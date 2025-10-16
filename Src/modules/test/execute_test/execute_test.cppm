@@ -24,7 +24,7 @@ export
 template <typename coordinate_t>
 class program_result_t
 {
-    private:
+    private: /* what about comment like this? i think its comfortable to visually separate variables from methods*/
         //--------------------- varibles -----------------------------------
 
         size_t              good_triangles_quant_     ;

@@ -26,25 +26,30 @@ export
 struct test_answer_t
 {
     public:
-        // struct public methods    
         size_t get_good_triangles_quantity  (        ) const;
         size_t get_number_of_i_good_triangle(size_t i) const;
         ON_DEBUG(
         void   dump                         (        ) const;
         )
 
-        // ctors
-        test_answer_t(                            ); // ctor for reading from stdin
+        /*
+        ctor for reading from stdin
+        made nothing, but needed for 
+        initialization test_data_t
+        made nothing, because when input from stdin
+        you check test result yourself.
+        in that case answer is in stdout 
+        */
+        test_answer_t() = default; // ctor for reading from stdin
         test_answer_t(std::string_view answer_file); // reading from .dat file
 
     private:
-        // struct private vairable
         size_t              good_triangles_quantity_;
         std::vector<size_t> good_triangles_numbers_ ;
         std::string         answer_file_            ;
         std::ifstream       file_                   ;
 
-        // struct private methods for reading from .ans file
+        // struct methods for reading from .ans file
         void open_answer_file           ();
         void read_test_answer_from_ans  ();
         void close_answer_file          ();
@@ -58,26 +63,6 @@ struct test_answer_t
         [[noreturn]]
         void empty_answer_file          ();
 };
-
-//---------------------------------------------------------------------------------------------------------------
-
-
-// ctor
-//---------------------------------------------------------------------------------------------------------------
-// ctor for reading from stdin
-// made nothing, but needed for 
-// initialization test_data_t
-
-// made nothing, because when input from stdin
-// you check test result yourself.
-// in that case answer is in stdout
-
-test_answer_t::test_answer_t() :
-good_triangles_quantity_(0 ),
-good_triangles_numbers_ (0 ),
-answer_file_            (""),
-file_                   (  )
-{}
 
 //---------------------------------------------------------------------------------------------------------------
 

@@ -30,16 +30,13 @@ export module flags_parser;
 export class flags_parser
 {
     public:
-        // class public methods
         input_stream   get_input_stream                  () const;
         test_files_t   get_test_files                    () const;
         bool           print_result_and_dont_check_answer() const;
 
-        // ctor
+        flags_parser() = delete;
         flags_parser(int argc, char* argv[]);
-       ~flags_parser();
     private:
-        // class private variables
         input_stream  input_stream_                      ;
         test_files_t  test_files_                        ;
         bool          print_result_and_dont_check_answer_;
@@ -53,7 +50,6 @@ export class flags_parser
 
         are_parametrs_already_defined are_parametrs_already_defined_;
 
-        // class private methods
         void         parse_flag_input_stream                         ();
         [[noreturn]]        
         void         parse_flag_help                                 ();
@@ -115,7 +111,6 @@ const std::pair<input_stream, std::string> input_stream_flag_values[] =
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
-// ctor
 flags_parser::flags_parser(int argc, char* argv[]) :
 input_stream_                      (input_stream::standart_input), // default value of input_stream_
 test_files_                        ("", "")                      , // we don`t know files before parsing args
@@ -133,20 +128,11 @@ print_result_and_dont_check_answer_(true)                          // in default
             default : builtin_unreachable_wrapper("all unknown options must be pase in <case -1:>");
         }
     }
-}
-
-//---------------------------------------------------------------------------------------------------------------
-
-flags_parser::~flags_parser()
-{
     // set getopt args to default values
     optarg = nullptr;
     optind = 1;
 }
 
-//---------------------------------------------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
 input_stream flags_parser::get_input_stream() const

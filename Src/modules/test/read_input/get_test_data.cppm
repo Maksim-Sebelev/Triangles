@@ -30,14 +30,11 @@ template <typename coordinate_t>
 struct test_data_t
 {
     private:
-        // private struct variables
         test_input_t<coordinate_t> test_input_                        ;
         test_answer_t              test_answer_                       ;
         bool                       print_result_and_dont_check_answer_;
 
     public:
-        // public struct methods
-        // ctor`s
         test_data_t();                               // ctor for stdin
         test_data_t(const test_files_t& test_files); // ctor for files 
 

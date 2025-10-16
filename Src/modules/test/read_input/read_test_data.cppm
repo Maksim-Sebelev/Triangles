@@ -29,13 +29,11 @@ template <typename coordinate_t>
 class test_input_t
 {
     public:
-        // struct public methods
         size_t                                get_triangles_quantity()         const;
         triangle_t<coordinate_t>              get_i_triangle        (size_t i) const;
         std::vector<triangle_t<coordinate_t>> get_triangles         ()         const;
 
-        // ctors
-        test_input_t(); // ctor for reading from stdin
+        test_input_t();                           // ctor for reading from stdin
         test_input_t(std::string_view test_file); // ctor for reading from .dat file
 
         // dump in logfile
@@ -44,18 +42,16 @@ class test_input_t
         )
 
     private:
-        // struct private vairbales
         size_t                                triangles_quant_ ;
         std::vector<triangle_t<coordinate_t>> triangles_       ;
         std::ifstream                         file_            ;
         std::string                           test_file_       ;
 
-        // struct private methods
         bool                     is_index_out_of_range                             (size_t index) const;
         [[noreturn]]
         void                     index_out_of_range                                (size_t index) const;
 
-        // struct private methods for reading from stdin
+        // struct methods for reading from stdin
         void                     read_triangles_quant_from_stdin                   ();
         void                     read_all_triangles_from_stdin                     ();
 
@@ -75,7 +71,7 @@ class test_input_t
         void                     no_input_triangles_from_stdin                     ();
 
 
-        // struct private methods for reading tests from .dat file ans answers from .ans file
+        // struct methods for reading tests from .dat file ans answers from .ans file
         void                     open_test_file                                    ();
         void                     read_triangles_quant_from_dat                     ();
         void                     read_all_triangles_from_dat                       ();

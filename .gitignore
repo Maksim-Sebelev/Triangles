@@ -1,0 +1,14 @@
+# my vscode settings
+.vscode/
+
+# workdir, here are files created with cmake
+build/
+
+# dir with `tree` command outpur, needed for readme
+project_struct/
+
+# clangd cache
+.cache/
+
+# directory for logger output
+log/

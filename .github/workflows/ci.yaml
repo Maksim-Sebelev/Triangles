@@ -1,0 +1,44 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Test WITHOUT Logger
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: sudo apt-get install -y cmake clang ninja-build
+  
+    - name: Build without logger
+      run: |
+        bash start.sh && cd build
+        ninja ready_for_unit_tests
+
+    - name: Run Tests
+      run: |
+        ctest
+
+  test-with-logger:
+    name: Test WITH Logger  
+    runs-on: ubuntu-latest
+  
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: sudo apt-get install -y clang ninja-build
+
+    - name: Build with logger
+      run: |
+        bash start.sh use-logger && cd build/
+        ninja ready_for_unit_tests
+
+    - name: Run tests
+      run: |
+        ctest

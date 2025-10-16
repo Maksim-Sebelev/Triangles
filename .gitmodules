@@ -1,0 +1,3 @@
+[submodule "Src/third-party/logger"]
+	path = Src/third-party/logger
+	url = git@github.com:Maksim-Sebelev/logger.git

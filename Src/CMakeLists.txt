@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.28) # 3.28 for modules
 
 project(Triangles
     LANGUAGES CXX
+    VERSION 1.1
 )
 
 set(CMAKE_CXX_STANDARD 23)
@@ -12,98 +13,76 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # =============================================================================================================
 
-function(add_release_and_debug_options_to_target executable)
-    # some saitizers for debug version
-    set(DEBUG_SANITIZERS
-        -fsanitize=address
-        -fsanitize=alignment
-        -fsanitize=bool
-        -fsanitize=bounds
-        -fsanitize=enum
-        -fsanitize=float-cast-overflow
-        -fsanitize=undefined
-        -fsanitize=unreachable
-        -fsanitize=vla-bound
-        -fsanitize=vptr
-        -fsanitize=float-divide-by-zero
-        -fsanitize=integer-divide-by-zero
-        -fsanitize=leak
-        -fsanitize=nonnull-attribute
-        -fsanitize=null
-        -fsanitize=return
-        -fsanitize=returns-nonnull-attribute
-        -fsanitize=shift
-        -fsanitize=signed-integer-overflow
-        # -fsanitize=object-size
-)
-
-    set(DEBUG_FLAGS
-        -D _DEBUG
-        -O0
-        -Wall
-        -Wextra
-        -Wshadow
-        -Weffc++
-    )
-
-    target_compile_options(${executable}
-        PRIVATE
-            $<$<CONFIG:Debug>:
-                ${DEBUG_SANITIZERS}
-                ${DEBUG_FLAGS}
-            >
-    )
-
-    # linking sanitizers
-    target_link_options(${executable}
-        PRIVATE
-            $<$<CONFIG:Debug>:${DEBUG_SANITIZERS}>
-    )
-
-endfunction(add_release_and_debug_options_to_target)
-
-# =============================================================================================================
-
-enable_testing()
-include(CTest)
-
-# function for adding tests (not unit) to some executable files
-function(add_testing test_executable test_dir ans_dir)
-
-    file(GLOB test_files "${test_dir}/*.dat") # save all tests -files in variable 'test_files'
-
-    # get quantity of tests
-    list(LENGTH test_files num_tests)
-
-    # check that at least 1 test was found
-    if(${num_tests} EQUAL 0)
-        message(WARNING "No .dat files found in ${test_dir}")
-        return()
-    endif()
-
-    # add tests
-    foreach(test_file ${test_files})
-
-        # get name of answer file
-        get_filename_component(test_file_name "${test_file}" NAME_WE) # NAME_WE = without extension
-        set(answer_file "${ans_dir}/${test_file_name}.ans")
-
-        # create test_name
-        set(test_name ${test_executable}_${test_file_name})
-
-        # add test
-        add_test(
-            NAME ${test_name}
-            # execute test
-            COMMAND ./${test_executable} --input_stream=files ${test_file} ${answer_file}
-
-            # working directory - dircetory with executable file
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+function(target_debug_options target)
+    if (MSVC) # правда что ли?
+        set(DEBUG_FLAGS
+            /W4
+            /Wx
         )
 
-    endforeach()
+        target_compile_options(${target}
+            PRIVATE
+                $<$<CONFIG:Debug>:${DEBUG_FLAGS}>
+        )    
 
-endfunction(add_testing)
+    else() # exptect g++ or clang++
+        # some saitizers for debug version
+        set(DEBUG_SANITIZERS
+            -fsanitize=address
+            -fsanitize=alignment
+            -fsanitize=bool
+            -fsanitize=bounds
+            -fsanitize=enum
+            -fsanitize=float-cast-overflow
+            -fsanitize=undefined
+            -fsanitize=unreachable
+            -fsanitize=vla-bound
+            -fsanitize=vptr
+            -fsanitize=float-divide-by-zero
+            -fsanitize=integer-divide-by-zero
+            -fsanitize=leak
+            -fsanitize=nonnull-attribute
+            -fsanitize=null
+            -fsanitize=return
+            -fsanitize=returns-nonnull-attribute
+            -fsanitize=shift
+            -fsanitize=signed-integer-overflow
+            # -fsanitize=object-size
+        )
+
+        set(DEBUG_FLAGS
+            -Wall
+            -Wextra
+            -Wshadow
+            -Wnon-virtual-dtor
+            -Weffc++
+            # experimental flags:
+            -Wcast-align
+            -Wunused
+            -Woverloaded-virtual
+            -Wconversion
+            -Wdouble-promotion
+            -Wformat=2
+            -Wimplicit-fallthrough
+        )
+
+        target_compile_options(${target}
+            PRIVATE
+                $<$<CONFIG:Debug>:
+                    ${DEBUG_SANITIZERS}
+                    ${DEBUG_FLAGS}
+                >
+        )
+
+        # linking sanitizers
+        target_link_options(${target}
+            PRIVATE
+                $<$<CONFIG:Debug>:${DEBUG_SANITIZERS}>
+        )
+
+    endif()
+
+endfunction(target_debug_options)
 
 # =============================================================================================================
 # set some variables for add_executale
@@ -141,7 +120,7 @@ target_include_directories(${MATH_LIB}
 # NOT default cmake functions
 # this is my function, defined in 11 line of this `CMakeLists.txt` file
 # set some compile options for run_trinagles
-add_release_and_debug_options_to_target(${MATH_LIB})
+target_debug_options(${MATH_LIB})
 
 # =============================================================================================================
 
@@ -176,7 +155,7 @@ target_link_libraries(${HELP_GEOMETRY_LIB}
 # NOT default cmake functions
 # this is my function, defined in 11 line of this `CMakeLists.txt` file
 # set some compile options for run_trinagles
-add_release_and_debug_options_to_target(${HELP_GEOMETRY_LIB})
+target_debug_options(${HELP_GEOMETRY_LIB})
 
 # =============================================================================================================
 
@@ -199,13 +178,48 @@ target_include_directories(${TRIANGLES_LIB}
 
 target_link_libraries(${TRIANGLES_LIB}
     PRIVATE
-        ${HELP_GEOMETRY_LIB}
         ${MATH_LIB}
+
+    PUBLIC
+        ${HELP_GEOMETRY_LIB}
 )
 # NOT default cmake functions
 # this is my function, defined in 11 line of this `CMakeLists.txt` file
 # set some compile options for run_trinagles
-add_release_and_debug_options_to_target(${TRIANGLES_LIB})
+target_debug_options(${TRIANGLES_LIB})
+
+# =============================================================================================================
+
+set(OCTO_TREE_LIB octo_tree_lib)
+
+add_library(${OCTO_TREE_LIB})
+
+target_sources(${OCTO_TREE_LIB}
+    PUBLIC
+        FILE_SET CXX_MODULES
+        TYPE     CXX_MODULES
+        FILES ${GEOMETRY_MODULES_DIR}/octotree.cppm
+)
+
+target_include_directories(${OCTO_TREE_LIB}
+    PRIVATE
+        ${GLOBAL_INCLUDE_DIR}
+        ${GEOMETRY_INCLUDE_DIR}
+)
+
+target_link_libraries(${OCTO_TREE_LIB}
+    PRIVATE
+        ${MATH_LIB}
+
+    PUBLIC
+        ${HELP_GEOMETRY_LIB}
+        ${TRIANGLES_LIB}
+)
+# NOT default cmake functions
+# this is my function, defined in 11 line of this `CMakeLists.txt` file
+# set some compile options for run_trinagles
+target_debug_options(${OCTO_TREE_LIB})
+
 # =============================================================================================================
 
 set(TEST_LIB test_lib)
@@ -244,7 +258,7 @@ target_link_libraries(${TEST_LIB}
 # NOT default cmake functions
 # this is my function, defined in 11 line of this `CMakeLists.txt` file
 # set some compile options for run_trinagles
-add_release_and_debug_options_to_target(${TEST_LIB})
+target_debug_options(${TEST_LIB})
 
 # =============================================================================================================
 
@@ -271,7 +285,7 @@ target_link_libraries(${TRIANGLES_EXE}
 # NOT default cmake functions
 # this is my function, defined in 11 line of this `CMakeLists.txt` file
 # set some compile options for run_trinagles
-add_release_and_debug_options_to_target(${TRIANGLES_EXE})
+target_debug_options(${TRIANGLES_EXE})
 
 # =============================================================================================================
 # for fun adding a double coordinate type triangles
@@ -297,30 +311,8 @@ target_link_libraries(${DOUBLE_TRIANGLES_EXE}
 # NOT default cmake functions
 # this is my function, defined in 11 line of this `CMakeLists.txt` file
 # set some compile options for run_trinagles
-add_release_and_debug_options_to_target(${DOUBLE_TRIANGLES_EXE})
+target_debug_options(${DOUBLE_TRIANGLES_EXE})
 # =============================================================================================================
-
-# set the directory with tests for run_triangles
-set(TRIANGLES_TEST_DIR ${PROJECT_SOURCE_DIR}/../tests)
-
-# set the directories with test data for run_triangles
-set(TRIANGLES_TEST_DAT_DIR ${TRIANGLES_TEST_DIR}/dat)
-
-# set the directories with test answers for run_triangles
-set(TRIANGLES_TEST_ANS_DIR ${TRIANGLES_TEST_DIR}/ans)
-
-# NOT default cmake functions
-# this is my function, defined in 82 line of this `CMakeLists.txt` file
-
-add_testing(${TRIANGLES_EXE}
-            ${TRIANGLES_TEST_DAT_DIR}
-            ${TRIANGLES_TEST_ANS_DIR}
-)
-
-add_testing(${DOUBLE_TRIANGLES_EXE}
-            ${TRIANGLES_TEST_DAT_DIR}
-            ${TRIANGLES_TEST_ANS_DIR}
-)
 
 # =============================================================================================================
 # add custom targets 'rebuild'
@@ -333,35 +325,71 @@ add_custom_target(${REBUILD_TARGET}
     COMMENT "Rebuilding project"
 )
 
-# add custom target 'clean_log'
-set(CLEAN_LOG_TARGET clean_log)
-add_custom_target(${CLEAN_LOG_TARGET}
-    COMMAND rm -rf ${CMAKE_BINARY_DIR}/../log/*
-)
+# =============================================================================================================
+# TODO: compile logger as external project (ExternalProject_Add)
+# add logger if defined USE_LOGGER flag
+if (USE_LOGGER)
+    message("-- Adding logger")
+
+    # костыль, но так надо чтобы не ждать логгера по полгода и без запары с exterbal project (я 2 раза пытался его настроить, оба проиграл)
+    set(MAIN_PROJECT_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+    set(CMAKE_BUILD_TYPE Release)
+
+    set(LOGGER_PROJECT_DIR ${CMAKE_SOURCE_DIR}/third-party/logger/Src)
+    add_subdirectory(${LOGGER_PROJECT_DIR})
+
+    function(add_logger some_target)
+        target_link_libraries(${some_target} 
+            PRIVATE
+                logger
+        )
+        target_compile_definitions(${some_target}
+            PRIVATE
+                USE_LOGGER
+        )
+    endfunction(add_logger)
+
+    set(TARGETS_USING_LOGGER
+        ${TRIANGLES_EXE}
+        ${DOUBLE_TRIANGLES_EXE}
+        ${HELP_GEOMETRY_LIB}
+        ${TRIANGLES_LIB}
+        ${OCTO_TREE_LIB}
+        ${TEST_LIB}
+        ${MATH_LIB}
+        ${ALL_UNIT_TESTS_TARGET}
+    )
+
+    foreach(target_that_use_logger ${TARGETS_USING_LOGGER})
+        add_logger(${target_that_use_logger})
+    endforeach()
+
+    set(CMAKE_BUILD_TYPE ${MAIN_PROJECT_BUILD_TYPE})
+
+endif()
+
+# =============================================================================================================
+
+# TESTS (unit and e2e)
+enable_testing()
 
 # =============================================================================================================
 # UNIT-TESTS
 
-# installation of googletest
-include(FetchContent)
-
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-)
-
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-
+find_package(GTest REQUIRED)
+include(GoogleTest)
+# WHAT DOU YOU THINK ABOUT this:
+# if (NOT find_package(gtest))
+# <fetchcontnent installation>
+# endif()
 
 # =============================================================================================================
 
-# function to genererate unit-tests
-# IF SECOND AND/OR THIRD ARGS ARE/IS LIST(-S), DONT FORGET ABOUT "<some args>"
+# function to genererate unit-test
+# IF SECOND AND/OR THIRD ARGS ARE/IS LIST(-S), DONT FORGET ABOUT QUOTES
 
-# 1) create_unit_test
-# 2) add_custom_target(run_unit_test ...)
-function(create_unit_test unit_test_target_name unit_test_src modules_library)
+# target_unit_test
+function(target_unit_test unit_test_target_name unit_test_src modules_library)
 
     add_executable(${unit_test_target_name} EXCLUDE_FROM_ALL
                    ${unit_test_src}
@@ -381,8 +409,8 @@ function(create_unit_test unit_test_target_name unit_test_src modules_library)
 
     # NOT default cmake function
     # MY function for add compile options to executable
-    add_release_and_debug_options_to_target(${unit_test_target_name})
-endfunction(create_unit_test)
+    target_debug_options(${unit_test_target_name})
+endfunction(target_unit_test)
 
 
 # =============================================================================================================
@@ -408,7 +436,7 @@ set(UNIT_TEST_DIR ${PROJECT_SOURCE_DIR}/../tests/unit-tests)
 set(COMPARE_UNIT_TEST_EXE compare_unit_test                          )
 set(COMPARE_UNIT_TEST_SRC ${UNIT_TEST_DIR}/math/unit_test_compare.cpp)
 
-create_unit_test(
+target_unit_test(
     "${COMPARE_UNIT_TEST_EXE}"
     "${COMPARE_UNIT_TEST_SRC}"
     "${MATH_LIB}"
@@ -420,7 +448,7 @@ create_unit_test(
 set(VECTOR_UNIT_TEST_EXE vector_unit_test                          )
 set(VECTOR_UNIT_TEST_SRC ${UNIT_TEST_DIR}/math/unit_test_vector.cpp)
 
-create_unit_test(
+target_unit_test(
     "${VECTOR_UNIT_TEST_EXE}"
     "${VECTOR_UNIT_TEST_SRC}"
     "${MATH_LIB}"
@@ -432,7 +460,7 @@ create_unit_test(
 set(MATRIX_UNIT_TEST_EXE matrix_unit_test                          )
 set(MATRIX_UNIT_TEST_SRC ${UNIT_TEST_DIR}/math/unit_test_matrix.cpp)
 
-create_unit_test(
+target_unit_test(
     "${MATRIX_UNIT_TEST_EXE}"
     "${MATRIX_UNIT_TEST_SRC}"
     "${MATH_LIB}"
@@ -444,7 +472,7 @@ create_unit_test(
 set(LIN_SYS_UNIT_TEST_EXE linear_systems_unit_test                         )
 set(LIN_SYS_UNIT_TEST_SRC ${UNIT_TEST_DIR}/math/unit_test_linear_system.cpp)
 
-create_unit_test(
+target_unit_test(
     "${LIN_SYS_UNIT_TEST_EXE}"
     "${LIN_SYS_UNIT_TEST_SRC}"
     "${MATH_LIB}"
@@ -471,7 +499,7 @@ add_custom_target(${MATH_UNIT_TESTS_TARGET}
 set(POINT_UNIT_TEST_EXE point_unit_test                              )
 set(POINT_UNIT_TEST_SRC ${UNIT_TEST_DIR}/geometry/unit_test_point.cpp)
 
-create_unit_test(
+target_unit_test(
     "${POINT_UNIT_TEST_EXE}"
     "${POINT_UNIT_TEST_SRC}"
     "${HELP_GEOMETRY_LIB}"
@@ -483,7 +511,7 @@ create_unit_test(
 set(LINE_UNIT_TEST_EXE line_unit_test                              )
 set(LINE_UNIT_TEST_SRC ${UNIT_TEST_DIR}/geometry/unit_test_line.cpp)
 
-create_unit_test(
+target_unit_test(
     "${LINE_UNIT_TEST_EXE}"
     "${LINE_UNIT_TEST_SRC}"
     "${HELP_GEOMETRY_LIB}"
@@ -494,7 +522,7 @@ create_unit_test(
 set(PLAIN_UNIT_TEST_EXE plain_unit_test                              )
 set(PLAIN_UNIT_TEST_SRC ${UNIT_TEST_DIR}/geometry/unit_test_plain.cpp)
 
-create_unit_test(
+target_unit_test(
     "${PLAIN_UNIT_TEST_EXE}"
     "${PLAIN_UNIT_TEST_SRC}"
     "${HELP_GEOMETRY_LIB}"
@@ -506,7 +534,7 @@ create_unit_test(
 set(TRIANGLES_UNIT_TEST_EXE triangles_unit_test                              )
 set(TRIANGLES_UNIT_TEST_SRC ${UNIT_TEST_DIR}/geometry/unit_test_triangles.cpp)
 
-create_unit_test(
+target_unit_test(
     "${TRIANGLES_UNIT_TEST_EXE}"
     "${TRIANGLES_UNIT_TEST_SRC}"
     "${TRIANGLES_LIB}"
@@ -533,7 +561,7 @@ add_custom_target(${GEOMETRY_UNIT_TESTS_TARGET}
 set(READ_ANS_UNIT_TEST_EXE read_ans_unit_test                             )
 set(READ_ANS_UNIT_TEST_SRC ${UNIT_TEST_DIR}/test/unit_test_read_answer.cpp)
 
-create_unit_test(
+target_unit_test(
     "${READ_ANS_UNIT_TEST_EXE}"
     "${READ_ANS_UNIT_TEST_SRC}"
     "${TEST_LIB}"
@@ -545,7 +573,7 @@ create_unit_test(
 set(READ_TEST_DATA_UNIT_TEST_EXE read_test_data_unit_test                          )
 set(READ_TEST_DATA_UNIT_TEST_SRC ${UNIT_TEST_DIR}/test/unit_test_read_test_data.cpp)
 
-create_unit_test(
+target_unit_test(
     "${READ_TEST_DATA_UNIT_TEST_EXE}"
     "${READ_TEST_DATA_UNIT_TEST_SRC}"
     "${TEST_LIB}"
@@ -557,7 +585,7 @@ create_unit_test(
 set(FLAG_PARSER_UNIT_TEST_EXE flag_parser_unit_test                          )
 set(FLAG_PARSER_UNIT_TEST_SRC ${UNIT_TEST_DIR}/test/unit_test_flag_parser.cpp)
 
-create_unit_test(
+target_unit_test(
     "${FLAG_PARSER_UNIT_TEST_EXE}"
     "${FLAG_PARSER_UNIT_TEST_SRC}"
     "${TEST_LIB}"
@@ -569,7 +597,7 @@ create_unit_test(
 set(GET_TEST_DATA_UNIT_TEST_EXE get_test_data_unit_test                          )
 set(GET_TEST_DATA_UNIT_TEST_SRC ${UNIT_TEST_DIR}/test/unit_test_get_test_data.cpp)
 
-create_unit_test(
+target_unit_test(
     "${GET_TEST_DATA_UNIT_TEST_EXE}"
     "${GET_TEST_DATA_UNIT_TEST_SRC}"
     "${TEST_LIB}"
@@ -605,43 +633,79 @@ add_custom_target(${BUILD_ALL_UNIT_TESTS_TARGET}
 
 # =============================================================================================================
 
-include(GoogleTest)
+include(CTest)
+
+# function for adding tests (not unit) to some executable files
+function(target_e2e_test test_executable test_dir ans_dir)
+
+    file(GLOB test_files "${test_dir}/*.dat") # save all tests -files in variable 'test_files'
+
+    # get quantity of tests
+    list(LENGTH test_files num_tests)
+
+    # check that at least 1 test was found
+    if(${num_tests} EQUAL 0)
+        message(WARNING "No .dat files found in ${test_dir}")
+        return()
+    endif()
+
+    # add tests
+    foreach(test_file ${test_files})
+
+        # get name of answer file
+        get_filename_component(test_file_name "${test_file}" NAME_WE) # NAME_WE = without extension
+        set(answer_file "${ans_dir}/${test_file_name}.ans")
+
+        # create test_name
+        set(test_name ${test_executable}_${test_file_name})
+
+        if (VERBOSE_OUTPUT)
+            set(TEST_COMMAND ./${test_executable} --verbose --input_stream=files ${test_file} ${answer_file})
+        else()
+            set(TEST_COMMAND ./${test_executable} --input_stream=files ${test_file} ${answer_file})
+        endif()
+
+        # add test
+        add_test(
+            NAME ${test_name}
+            # execute test
+        
+            COMMAND ${TEST_COMMAND}
+            # working directory - dircetory with executable file
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        )
+
+    endforeach()
+endfunction(target_e2e_test)
+
+# =============================================================================================================
+
+# set the directory with e2e tests for run_triangles
+set(TRIANGLES_TEST_DIR ${PROJECT_SOURCE_DIR}/../tests/e2e)
+
+# set the directories with e2e test data for run_triangles
+set(TRIANGLES_TEST_DAT_DIR ${TRIANGLES_TEST_DIR}/dat)
+
+# set the directories with e2e test answers for run_triangles
+set(TRIANGLES_TEST_ANS_DIR ${TRIANGLES_TEST_DIR}/ans)
+
+# add e2e tests to float triangles
+target_e2e_test(${TRIANGLES_EXE}
+               ${TRIANGLES_TEST_DAT_DIR}
+               ${TRIANGLES_TEST_ANS_DIR}
+)
+
+# add e2e tests to long double triangles
+target_e2e_test(${DOUBLE_TRIANGLES_EXE}
+               ${TRIANGLES_TEST_DAT_DIR}
+               ${TRIANGLES_TEST_ANS_DIR}
+)
+
+# =============================================================================================================
+
+# TODO: back gtest
 foreach(unit_test_target ${ALL_UNIT_TESTS_TARGET})
     gtest_discover_tests(${unit_test_target})
 endforeach()
 
 # =============================================================================================================
-
-# add logger if defined USE_LOGGER flag
-if (USE_LOGGER EQUAL 1)
-    message("-- Adding logger")
-
-    set(LOGGER_PROJECT_DIR ${CMAKE_SOURCE_DIR}/third-party/logger/Src)
-    add_subdirectory(${LOGGER_PROJECT_DIR})
-
-    function(add_logger some_target)
-        target_link_libraries(${some_target} 
-            PRIVATE
-                logger
-        )
-        target_compile_definitions(${some_target}
-            PRIVATE
-                USE_LOGGER
-        )
-    endfunction(add_logger)
-
-    set(TARGETS_USING_LOGGER
-        ${TRIANGLES_EXE}
-        ${DOUBLE_TRIANGLES_EXE}
-        ${HELP_GEOMETRY_LIB}
-        ${TRIANGLES_LIB}
-        ${TEST_LIB}
-        ${MATH_LIB}
-        ${ALL_UNIT_TESTS_TARGET}
-    )
-
-    foreach(target_that_use_logger ${TARGETS_USING_LOGGER})
-        add_logger(${target_that_use_logger})
-    endforeach()
-
-endif()

@@ -11,12 +11,12 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Install dependencies
-      run: sudo apt-get install -y cmake clang ninja-build
+      run: sudo apt-get install -y cmake clang ninja-build libgtest-dev
   
     - name: Build without logger
       run: |
         bash start.sh && cd build
-        ninja ready_for_unit_tests
+        ninja build_tests
 
     - name: Run Tests
       run: |
@@ -32,12 +32,12 @@ jobs:
         submodules: recursive
 
     - name: Install dependencies
-      run: sudo apt-get install -y clang ninja-build
+      run: sudo apt-get install -y clang ninja-build libgtest-dev
 
     - name: Build with logger
       run: |
         bash start.sh use-logger && cd build/
-        ninja ready_for_unit_tests
+        ninja build_tests
 
     - name: Run tests
       run: |

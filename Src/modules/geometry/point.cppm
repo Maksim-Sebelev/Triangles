@@ -4,6 +4,7 @@ module;
 
 #include <cmath>
 #include <iostream>
+#include <limits>
 
 #include "global.hpp"
 #include "custom_console_output.hpp"
@@ -13,14 +14,10 @@ import compare;
 
 #if defined(USE_LOGGER)
 import logger;
-#include <source_location>
+
 #include <string>
 #include <sstream>
 #endif /*define(USE_LOGGER)*/
-
-//----------------------------------------------------------------------------------------------------------------------------
-
-using namespace Detail::geometry;
 
 //----------------------------------------------------------------------------------------------------------------------------
 
@@ -28,7 +25,16 @@ export module point;
 
 //----------------------------------------------------------------------------------------------------------------------------
 
-export
+export namespace Geometry
+{
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+namespace Detail
+{
+
+//----------------------------------------------------------------------------------------------------------------------------
+
 template <typename coordinate_t>
 class point_t
 {
@@ -36,9 +42,9 @@ class point_t
                 "In point_t as template type excpect only floating point type.");
 
     private:
-        coordinate_t x_coordinate_ = NAN;
-        coordinate_t y_coordinate_ = NAN;
-        coordinate_t z_coordinate_ = NAN;
+        coordinate_t x_coordinate_ = std::numeric_limits<coordinate_t>::quiet_NaN();
+        coordinate_t y_coordinate_ = std::numeric_limits<coordinate_t>::quiet_NaN();
+        coordinate_t z_coordinate_ = std::numeric_limits<coordinate_t>::quiet_NaN();
 
         void try_to_compare_invalid_point     () const;
         void try_to_compare_with_invalid_point() const;
@@ -114,7 +120,7 @@ point_t<coordinate_t>::get_z_coordinate() const
     return z_coordinate_;
 }
 
-//----------------------------------------------------------------------------------------------------------------------------template <typename coordinate_t>
+//----------------------------------------------------------------------------------------------------------------------------
 
 template <typename coordinate_t>
 bool
@@ -132,9 +138,10 @@ point_t<coordinate_t>::compare_with_another_point(const point_t& compare_point) 
         return false;
     }
 
-    return compare<coordinate_t>(x_coordinate_, compare_point.x_coordinate_) &&
-           compare<coordinate_t>(y_coordinate_, compare_point.y_coordinate_) &&
-           compare<coordinate_t>(z_coordinate_, compare_point.z_coordinate_);
+    return
+        Math::Compare::compare<coordinate_t>(x_coordinate_, compare_point.x_coordinate_) &&
+        Math::Compare::compare<coordinate_t>(y_coordinate_, compare_point.y_coordinate_) &&
+        Math::Compare::compare<coordinate_t>(z_coordinate_, compare_point.z_coordinate_);
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -193,9 +200,9 @@ template <typename coordinate_t>
 void
 point_t<coordinate_t>::made_invalid()
 {
-    x_coordinate_ = NAN;
-    y_coordinate_ = NAN;
-    z_coordinate_ = NAN;
+    x_coordinate_ = std::numeric_limits<coordinate_t>::quiet_NaN();
+    y_coordinate_ = std::numeric_limits<coordinate_t>::quiet_NaN();
+    z_coordinate_ = std::numeric_limits<coordinate_t>::quiet_NaN();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -271,5 +278,10 @@ point_t<coordinate_t>::get_dump(std::string_view name) const
     return point_dump.str();
 }
 )
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+} /* namespace Geometry */
+} /* namespace Detail */
 
 //----------------------------------------------------------------------------------------------------------------------------

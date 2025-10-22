@@ -9,11 +9,14 @@ module;
 #include <vector>
 
 #include "global.hpp"
+
+#if defined(_DEBUG)
 #include "custom_console_output.hpp"
+#endif // defined(_DEBUG)
 
 #if defined(USE_LOGGER)
 import logger;
-#include <source_location>
+
 #endif // defined(USE_LOGGER)
 
 //---------------------------------------------------------------------------------------------------------------
@@ -22,7 +25,16 @@ export module read_test_answer;
 
 //---------------------------------------------------------------------------------------------------------------
 
-export
+export namespace InputData
+{
+
+//---------------------------------------------------------------------------------------------------------------
+
+namespace Detail
+{
+
+//---------------------------------------------------------------------------------------------------------------
+
 struct test_answer_t
 {
     public:
@@ -108,7 +120,7 @@ void test_answer_t::dump() const
                                                                         << std::endl
                                                                         << std::endl;
 
-    std::cout << "Good triangles qunatiny = " BOLD GREEN << good_triangles_quantity_
+    std::cout << "Good triangles quatity = " BOLD GREEN << good_triangles_quantity_
                                                                         << RESET_CONSOLE_OUT
                                                                         << std::endl
                                                                         << std::endl;
@@ -181,5 +193,10 @@ void test_answer_t::failed_read_answer_from_ans()
 
     exit(EXIT_FAILURE);
 }
+
+//---------------------------------------------------------------------------------------------------------------
+
+} /* namesapce Detail */
+} /* namespace InputData */
 
 //---------------------------------------------------------------------------------------------------------------

@@ -14,7 +14,7 @@ module;
 import triangle;
 
 #if defined (USE_LOGGER)
-#include <source_location>
+
 import logger;
 #endif // defined(USE_LOGGER)
 
@@ -24,14 +24,23 @@ export module read_test_data;
 
 //---------------------------------------------------------------------------------------------------------------
 
-export
+export namespace InputData
+{
+
+//---------------------------------------------------------------------------------------------------------------
+
+namespace Detail
+{
+
+//---------------------------------------------------------------------------------------------------------------
+
 template <typename coordinate_t>
 class test_input_t
 {
     public:
-        size_t                                get_triangles_quantity()         const;
-        triangle_t<coordinate_t>              get_i_triangle        (size_t i) const;
-        std::vector<triangle_t<coordinate_t>> get_triangles         ()         const;
+        size_t                                          get_triangles_quantity()         const;
+        Geometry::triangle_t<coordinate_t>              get_i_triangle        (size_t i) const;
+        std::vector<Geometry::triangle_t<coordinate_t>> get_triangles         ()         const;
 
         test_input_t();                           // ctor for reading from stdin
         test_input_t(std::string_view test_file); // ctor for reading from .dat file
@@ -42,58 +51,52 @@ class test_input_t
         )
 
     private:
-        size_t                                triangles_quant_ ;
-        std::vector<triangle_t<coordinate_t>> triangles_       ;
-        std::ifstream                         file_            ;
-        std::string                           test_file_       ;
+        size_t                                          triangles_quant_ ;
+        std::vector<Geometry::triangle_t<coordinate_t>> triangles_       ;
+        std::ifstream                                   file_            ;
+        std::string                                     test_file_       ;
 
-        bool                     is_index_out_of_range                             (size_t index) const;
+        bool                               is_index_out_of_range                             (size_t index) const;
         [[noreturn]]
-        void                     index_out_of_range                                (size_t index) const;
+        void                               index_out_of_range                                (size_t index) const;
 
         // struct methods for reading from stdin
-        void                     read_triangles_quant_from_stdin                   ();
-        void                     read_all_triangles_from_stdin                     ();
+        void                               read_triangles_quant_from_stdin                   ();
+        void                               read_all_triangles_from_stdin                     ();
 
-        triangle_t<coordinate_t> read_triangle_from_stdin                          (size_t number_of_triangle);
+        Geometry::triangle_t<coordinate_t> read_triangle_from_stdin                          (size_t number_of_triangle);
 
         [[noreturn]]
-        void                     failed_read_triangle_from_stdin                   (size_t number_of_bad_triangle, size_t number_of_bad_cordinate);
+        void                               failed_read_triangle_from_stdin                   (size_t number_of_bad_triangle, size_t number_of_bad_cordinate);
         [[noreturn]]             
-        void                     failed_read_cache_size_from_stdin                 ();
+        void                               failed_read_cache_size_from_stdin                 ();
         [[noreturn]]             
-        void                     negative_or_too_big_triangles_quant_from_stdin    ();
+        void                               negative_or_too_big_triangles_quant_from_stdin    ();
         [[noreturn]]             
-        void                     negative_or_too_big_input_size_from_stdin         ();
+        void                               negative_or_too_big_input_size_from_stdin         ();
         [[noreturn]]             
-        void                     failed_read_triangles_quant_from_stdin            ();
-        [[noreturn]]             
-        void                     no_input_triangles_from_stdin                     ();
-
+        void                               failed_read_triangles_quant_from_stdin            ();
 
         // struct methods for reading tests from .dat file ans answers from .ans file
-        void                     open_test_file                                    ();
-        void                     read_triangles_quant_from_dat                     ();
-        void                     read_all_triangles_from_dat                       ();
-        void                     close_test_file                                   ();
+        void                               open_test_file                                    ();
+        void                               read_triangles_quant_from_dat                     ();
+        void                               read_all_triangles_from_dat                       ();
+        void                               close_test_file                                   ();
 
-        triangle_t<coordinate_t> read_triangle_from_dat                            (size_t number_of_triangle);
+        Geometry::triangle_t<coordinate_t> read_triangle_from_dat                            (size_t number_of_triangle);
 
         [[noreturn]]
-        void                     failed_open_test_file                             ();
+        void                               failed_open_test_file                             ();
         [[noreturn]]
-        void                     failed_read_cache_size_from_dat                   ();
+        void                               failed_read_cache_size_from_dat                   ();
         [[noreturn]]
-        void                     negative_or_too_big_triangles_quant_from_dat      ();
+        void                               negative_or_too_big_triangles_quant_from_dat      ();
         [[noreturn]]
-        void                     negative_or_too_big_input_size_from_dat           ();
+        void                               negative_or_too_big_input_size_from_dat           ();
         [[noreturn]]
-        void                     failed_read_triangles_quant_from_dat              ();
+        void                               failed_read_triangles_quant_from_dat              ();
         [[noreturn]]
-        void                     failed_read_i_triangle_from_dat                   (size_t number_of_bad_triangle, size_t number_of_bad_cordinate);
-        [[noreturn]]             
-        void                     no_input_triangles_from_dat                       ();
-
+        void                               failed_read_i_triangle_from_dat                   (size_t number_of_bad_triangle, size_t number_of_bad_cordinate);
 };
 
 
@@ -141,7 +144,7 @@ test_input_t<coordinate_t>::get_triangles_quantity() const
 //---------------------------------------------------------------------------------------------------------------
 
 template <typename coordinate_t>
-triangle_t<coordinate_t>
+Geometry::triangle_t<coordinate_t>
 test_input_t<coordinate_t>::get_i_triangle(size_t i) const
 {
     if (is_index_out_of_range(i))
@@ -169,16 +172,13 @@ test_input_t<coordinate_t>::read_triangles_quant_from_stdin()
     if (signed_triangles_quant_ < 0)
         negative_or_too_big_triangles_quant_from_stdin(); // exit 1
 
-    if (signed_triangles_quant_ == 0)
-        no_input_triangles_from_stdin(); // exit 1
-
     triangles_quant_ = static_cast<size_t> (signed_triangles_quant_); // here we are sure, that signed_triangles_quant is > 0
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
 template <typename  coordinate_t>
-triangle_t<coordinate_t>
+Geometry::triangle_t<coordinate_t>
 test_input_t<coordinate_t>::read_triangle_from_stdin(size_t number_of_triangle)
 {
     static const size_t coordinates_number = 9;
@@ -194,7 +194,7 @@ test_input_t<coordinate_t>::read_triangle_from_stdin(size_t number_of_triangle)
         failed_read_triangle_from_stdin(number_of_triangle, i);
     }
 
-    return triangle_t<coordinate_t>(coordinates);   
+    return Geometry::triangle_t<coordinate_t>(coordinates);   
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -242,9 +242,6 @@ test_input_t<coordinate_t>::read_triangles_quant_from_dat()
     if (signed_triangles_quant_ < 0)
         negative_or_too_big_triangles_quant_from_dat(); // exit 1
 
-    if (signed_triangles_quant_ == 0)
-        no_input_triangles_from_dat(); // exit 1
-
     triangles_quant_ = static_cast<size_t> (signed_triangles_quant_); // here we are sure, that signed_triangles_quant is > 0
 }
 
@@ -263,7 +260,7 @@ test_input_t<coordinate_t>::read_all_triangles_from_dat()
 //---------------------------------------------------------------------------------------------------------------
 
 template <typename  coordinate_t>
-triangle_t<coordinate_t>
+Geometry::triangle_t<coordinate_t>
 test_input_t<coordinate_t>::read_triangle_from_dat(size_t num_of_triangle)
 {
     static const size_t coordinates_number = 9;
@@ -279,7 +276,7 @@ test_input_t<coordinate_t>::read_triangle_from_dat(size_t num_of_triangle)
         failed_read_i_triangle_from_dat(num_of_triangle, i);
     }
 
-    return triangle_t<coordinate_t>(coordinates);   
+    return Geometry::triangle_t<coordinate_t>(coordinates);   
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -373,20 +370,6 @@ test_input_t<coordinate_t>::failed_read_triangle_from_stdin(size_t number_of_bad
 template <typename coordinate_t>
 [[noreturn]]
 void
-test_input_t<coordinate_t>::no_input_triangles_from_stdin()
-{
-    std::cerr << RED "0 input triangles was given from stdin." << std::endl << WHITE
-              << "I love you, because you give me chance, to relax :) " "\u2764" RESET_CONSOLE_OUT
-              << std::endl;
-
-    exit(EXIT_SUCCESS);
-}
-
-//---------------------------------------------------------------------------------------------------------------
-
-template <typename coordinate_t>
-[[noreturn]]
-void
 test_input_t<coordinate_t>::failed_open_test_file()
 {
     std::cerr << RED "Failed open" WHITE BOLD " '" << test_file_ << "'" RESET_CONSOLE_OUT
@@ -437,17 +420,7 @@ test_input_t<coordinate_t>::failed_read_i_triangle_from_dat(size_t number_of_bad
 
 //---------------------------------------------------------------------------------------------------------------
 
-template <typename coordinate_t>
-[[noreturn]]
-void
-test_input_t<coordinate_t>::no_input_triangles_from_dat()
-{
-    std::cerr << RED "0 input triangles in " << WHITE ITALIC "`"
-              << test_file_ << "'" RESET_CONSOLE_OUT << std::endl
-              << WHITE "I love you, because you give me chance, to relax :) " "\u2764" RESET_CONSOLE_OUT
-              << std::endl;
-
-    exit(EXIT_SUCCESS);
-}
+} /* namespace Detail */
+} /* namespace InputData */
 
 //---------------------------------------------------------------------------------------------------------------

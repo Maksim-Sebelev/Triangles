@@ -16,14 +16,9 @@ import plain;
 
 #if defined(USE_LOGGER)
 import logger;
-#include <source_location>
 #include <sstream>
 #include <string>
 #endif // defined(USE_LOGGER)
-
-//----------------------------------------------------------------------------------------------------------------------------
-
-using namespace Detail::geometry;
 
 //----------------------------------------------------------------------------------------------------------------------------
 
@@ -35,7 +30,15 @@ export import point;
 
 //----------------------------------------------------------------------------------------------------------------------------
 
-export
+export namespace Geometry
+{
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+using namespace Detail;
+
+//----------------------------------------------------------------------------------------------------------------------------
+
 template <typename coordinate_t>
 class triangle_t
 {
@@ -56,10 +59,10 @@ class triangle_t
         point_t b_vertex_;
         point_t c_vertex_;
 
-        plain_t triangle_plain_;
-
         bool                is_intersect_with_another_triangle_on_same_plain       (const triangle_t& triangle)                          const;
-        bool                is_intersect_with_another_triangle_on_different_plains (const triangle_t& triangle)                          const;
+        bool                is_intersect_with_another_triangle_on_different_plains (const triangle_t& triangle,
+                                                                                    const plain_t& this_triangle_plain,
+                                                                                    const plain_t& another_triangle_plain)               const;
 
         relative_position_t get_intersection_of_line_and_triangle_on_the_same_plain(const line_t& line, const side_t& side,
                                                                                     segment_t& intersection_segment)                     const;
@@ -74,6 +77,8 @@ class triangle_t
         bool                are_intersect_line_intersections_with_triangles        (const triangle_t& triangle, const line_t& line)      const;
 
         side_t              get_i_side                                             (size_t i)                                            const;
+
+        plain_t             get_triangle_plain                                     ()                                                    const;
 
     public:
         triangle_t                                     () = default;
@@ -112,8 +117,7 @@ template <typename coordinate_t>
 triangle_t<coordinate_t>::triangle_t(const point_t& a, const point_t& b, const point_t& c) :
 a_vertex_(a),
 b_vertex_(b),
-c_vertex_(c),
-triangle_plain_(a, b, c)
+c_vertex_(c)
 {}
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -122,8 +126,7 @@ template <typename coordinate_t>
 triangle_t<coordinate_t>::triangle_t(std::array<coordinate_t, triangle_vertices_quant * dimension_of_space> array_of_coordinates) :
 a_vertex_(array_of_coordinates[0], array_of_coordinates[1], array_of_coordinates[2]),
 b_vertex_(array_of_coordinates[3], array_of_coordinates[4], array_of_coordinates[5]),
-c_vertex_(array_of_coordinates[6], array_of_coordinates[7], array_of_coordinates[8]),
-triangle_plain_(a_vertex_, b_vertex_, c_vertex_)
+c_vertex_(array_of_coordinates[6], array_of_coordinates[7], array_of_coordinates[8])
 {}
 
 // public methods
@@ -238,13 +241,20 @@ template <typename coordinate_t>
 bool
 triangle_t<coordinate_t>::is_intersect_with_another_triangle(const triangle_t<coordinate_t>& triangle) const
 {
-    const plain_t plain_1 =          triangle_plain_;
-    const plain_t plain_2 = triangle.triangle_plain_;
+    const plain_t    this_triangle_plain =          get_triangle_plain();
+    const plain_t another_triangle_plain = triangle.get_triangle_plain();
 
-    if (plain_1.compare_with_another_plain(plain_2))
+    glog.logc(LogColor::Yellow, "finding intersection of trianlges:");
+    glog.logc(LogColor::Red, get_dump("1"));
+    glog.logc(LogColor::Green, triangle.get_dump("2"));
+
+    if (this_triangle_plain.compare_with_another_plain(another_triangle_plain))
         return is_intersect_with_another_triangle_on_same_plain(triangle);
 
-    return is_intersect_with_another_triangle_on_different_plains(triangle);
+    return
+        is_intersect_with_another_triangle_on_different_plains(triangle,
+                                                               this_triangle_plain,
+                                                               another_triangle_plain);
 }
 
 // private methods
@@ -256,8 +266,9 @@ template <typename coordinate_t>
 bool
 triangle_t<coordinate_t>::is_intersect_with_another_triangle_on_same_plain(const triangle_t& triangle) const
 {
-    side_t              this_triangle_sides                                           [triangle_sides_quant];
-    side_t              another_triangle_sides                                        [triangle_sides_quant];
+    side_t this_triangle_sides    [triangle_sides_quant];
+    side_t another_triangle_sides [triangle_sides_quant];
+
 
     for (size_t i = 0; i < triangle_sides_quant; i++)
     {
@@ -280,6 +291,8 @@ triangle_t<coordinate_t>::is_intersect_with_another_triangle_on_same_plain(const
         }
     }
 
+
+
     return false;
 }
 
@@ -287,15 +300,19 @@ triangle_t<coordinate_t>::is_intersect_with_another_triangle_on_same_plain(const
 
 template <typename coordinate_t>
 bool
-triangle_t<coordinate_t>::is_intersect_with_another_triangle_on_different_plains(const triangle_t& triangle) const
+triangle_t<coordinate_t>::is_intersect_with_another_triangle_on_different_plains(const triangle_t& triangle,
+                                                                                 const    plain_t& this_triangle_plain,
+                                                                                 const plain_t& another_triangle_plain) const
 {
-    const plain_t plain_1 =          triangle_plain_;
-    const plain_t plain_2 = triangle.triangle_plain_;
-
     line_t              intersection_line;
-    relative_position_t relative_position_of_triangles_plains = plain_1.get_intersection_with_another_plain(plain_2, intersection_line);
+    relative_position_t relative_position_of_triangles_plains = this_triangle_plain.get_intersection_with_another_plain(another_triangle_plain, intersection_line);
 
-    msg_assert(!plain_1.compare_with_another_plain(plain_2), "in this functions we are parsing situation with not-equal plains");
+    static Logger l("triangle-intersection-diff-plains", "/home/ananasik/Pictures/mmm/dsenria/dsenria_best.jpg");
+
+    l.logc(LogColor::Red, get_dump("this"));
+    l.logc(LogColor::Green, triangle.get_dump("another"));
+
+    msg_assert(!this_triangle_plain.compare_with_another_plain(another_triangle_plain), "in this functions we are parsing situation with not-equal plains");
 
     if (relative_position_of_triangles_plains == relative_position_t::NO_INTERSECTION)
         return false; // plains are parallel
@@ -422,6 +439,17 @@ triangle_t<coordinate_t>::get_intersection_with_segment_on_the_same_plain(const 
                                                                 intersection_segment);                                                            
 }
 
+//----------------------------------------------------------------------------------------------------------------------------
+
+template <typename coordinate_t>
+plain_t<coordinate_t>
+triangle_t<coordinate_t>::get_triangle_plain() const
+{
+    return plain_t(a_vertex_,
+                   b_vertex_,
+                   c_vertex_);
+}
+
 // DUMP
 //----------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------
@@ -438,11 +466,15 @@ triangle_t<coordinate_t>::get_dump(std::string_view name) const
          << a_vertex_.get_dump("A") << "\n\t"
          << b_vertex_.get_dump("B") << "\n\t"
          << c_vertex_.get_dump("C") << "\n"
-         << triangle_plain_.get_dump("of triangle")
+         << get_triangle_plain().get_dump("of triangle")
          << "\n}\n";
 
     return dump.str();
 }
 )
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+} /* namespace Geometry */
 
 //----------------------------------------------------------------------------------------------------------------------------

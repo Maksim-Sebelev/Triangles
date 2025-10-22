@@ -9,10 +9,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Install dependencies
       run: sudo apt-get install -y cmake clang ninja-build libgtest-dev
-  
+
     - name: Build without logger
       run: |
         bash start.sh && cd build
@@ -25,7 +25,7 @@ jobs:
   test-with-logger:
     name: Test WITH Logger  
     runs-on: ubuntu-latest
-  
+
     steps:
     - uses: actions/checkout@v4
       with:

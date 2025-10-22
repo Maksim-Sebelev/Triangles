@@ -17,7 +17,16 @@ export import matrix;
 
 //----------------------------------------------------------------------------------------------------------------------------
 
-export
+export namespace Math
+{
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+namespace LinearAlgebra
+{
+
+//----------------------------------------------------------------------------------------------------------------------------
+
 enum class square_linear_system_solution_t : char
 {
     NO_SOLUTIONS ,
@@ -27,10 +36,12 @@ enum class square_linear_system_solution_t : char
 
 //----------------------------------------------------------------------------------------------------------------------------
 
-export
 template <typename number_t>
 class linear_system_2x2_t
 {
+    static_assert(std::is_floating_point_v<number_t>,
+        "maybe yoy dont need to linear system with integer coeffs??");
+
     using vector_2_t   = vector_2_t  <number_t>;
     using matrix_2x2_t = matrix_2x2_t<number_t>; 
 
@@ -45,7 +56,7 @@ class linear_system_2x2_t
         square_linear_system_solution_t get_solution_type()                     const;
 };
 
-//----------------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------
@@ -66,10 +77,10 @@ linear_system_2x2_t<number_t>::get_solution_type() const
     number_t deltaX = matrix_2x2_t(b_               , A_.get_column_2()).get_determinate();
     number_t deltaY = matrix_2x2_t(A_.get_column_1(), b_               ).get_determinate();
 
-    if (compare_with_null<number_t>(detA))
+    if (Math::Compare::compare_with_null<number_t>(detA))
     {
-        if (compare_with_null<number_t>(deltaX) &&
-            compare_with_null<number_t>(deltaY)
+        if (Math::Compare::compare_with_null<number_t>(deltaX) &&
+            Math::Compare::compare_with_null<number_t>(deltaY)
         ) return square_linear_system_solution_t::INF_SOLUTIONS;
 
         return square_linear_system_solution_t::NO_SOLUTIONS;
@@ -88,13 +99,13 @@ linear_system_2x2_t<number_t>::get_solution(vector_2_t& solution) const
     number_t deltaX = matrix_2x2_t(b_               , A_.get_column_2()).get_determinate();
     number_t deltaY = matrix_2x2_t(A_.get_column_1(), b_               ).get_determinate();
 
-    if (compare_with_null<number_t>(detA))
+    if (Math::Compare::compare_with_null<number_t>(detA))
     {
-        solution.set_a1(NAN);
-        solution.set_a2(NAN);
+        solution.set_a1(std::numeric_limits<number_t>::quiet_NaN());
+        solution.set_a2(std::numeric_limits<number_t>::quiet_NaN());
 
-        if (compare_with_null<number_t>(deltaX) &&
-            compare_with_null<number_t>(deltaY)
+        if (Math::Compare::compare_with_null<number_t>(deltaX) &&
+            Math::Compare::compare_with_null<number_t>(deltaY)
         ) return square_linear_system_solution_t::INF_SOLUTIONS;
 
         return square_linear_system_solution_t::NO_SOLUTIONS;
@@ -108,5 +119,10 @@ linear_system_2x2_t<number_t>::get_solution(vector_2_t& solution) const
 
     return square_linear_system_solution_t::ONE_SOLUTION;
 }
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+} /* namespace LinearAlgebra */
+} /* namespace Math */
 
 //----------------------------------------------------------------------------------------------------------------------------

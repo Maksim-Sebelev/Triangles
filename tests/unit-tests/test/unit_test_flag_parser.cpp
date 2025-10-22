@@ -3,6 +3,9 @@
 import flags_parser;
 import input_stream;
 
+using namespace FlagsParsing;
+using namespace InputData::Detail;
+
 TEST(FlagParserTesting, FileStream_1)
 {
     int argc = 4;
@@ -10,15 +13,15 @@ TEST(FlagParserTesting, FileStream_1)
     {
         (char*)"as if executable file name",
         (char*) "--input_stream=files",
-        (char*) "../tests/dat/1.dat",
-        (char*) "../tests/ans/1.ans",
+        (char*) "../tests/e2e/dat/1.dat",
+        (char*) "../tests/e2e/ans/1.ans",
     };
 
     flags_parser parser(argc, argv);
 
     EXPECT_EQ(parser.get_input_stream(), input_stream::dat_file_stream);
-    EXPECT_EQ(parser.get_test_files().test_file  , "../tests/dat/1.dat");
-    EXPECT_EQ(parser.get_test_files().answer_file, "../tests/ans/1.ans");
+    EXPECT_EQ(parser.get_test_files().test_file  , "../tests/e2e/dat/1.dat");
+    EXPECT_EQ(parser.get_test_files().answer_file, "../tests/e2e/ans/1.ans");
 
     EXPECT_EQ(parser.print_result_and_dont_check_answer(), false);
 }
@@ -30,15 +33,15 @@ TEST(FlagParserTesting, FileStream_2)
     {
         (char*)"as if executable file name",
         (char*) "-ifiles",
-        (char*) "../tests/ans/1.ans",
-        (char*) "../tests/dat/1.dat",
+        (char*) "../tests/e2e/ans/1.ans",
+        (char*) "../tests/e2e/dat/1.dat",
     };
 
     flags_parser parser(argc, argv);
 
     EXPECT_EQ(parser.get_input_stream(), input_stream::dat_file_stream);
-    EXPECT_EQ(parser.get_test_files().test_file  , "../tests/dat/1.dat");
-    EXPECT_EQ(parser.get_test_files().answer_file, "../tests/ans/1.ans");
+    EXPECT_EQ(parser.get_test_files().test_file  , "../tests/e2e/dat/1.dat");
+    EXPECT_EQ(parser.get_test_files().answer_file, "../tests/e2e/ans/1.ans");
 
     EXPECT_EQ(parser.print_result_and_dont_check_answer(), false);
 }

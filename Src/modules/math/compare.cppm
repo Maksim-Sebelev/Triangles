@@ -9,7 +9,6 @@ module;
 
 #if defined(USE_LOGGER)
 import logger;
-#include <source_location>
 #endif /* defined(USE_LOGGER) */
 
 //---------------------------------------------------------------------------------------------------------------
@@ -18,7 +17,16 @@ export module compare;
 
 //---------------------------------------------------------------------------------------------------------------
 
-export
+export namespace Math
+{
+
+//---------------------------------------------------------------------------------------------------------------
+
+namespace Compare
+{
+
+//---------------------------------------------------------------------------------------------------------------
+
 template <typename number_t>
 bool
 compare(number_t a, number_t b, 
@@ -37,7 +45,6 @@ compare(number_t a, number_t b,
 
 //---------------------------------------------------------------------------------------------------------------
 
-export
 template <typename number_t>
 bool
 compare_with_null(number_t a,
@@ -46,5 +53,10 @@ compare_with_null(number_t a,
     msg_assert(tolerance >= 0, "what do you want in compare_with_null with tolerace < 0??");
     return compare<number_t>(a, number_t(0), tolerance);
 }
+
+//---------------------------------------------------------------------------------------------------------------
+
+} /* namespace Compare */
+} /* namespace Math */
 
 //---------------------------------------------------------------------------------------------------------------

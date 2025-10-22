@@ -15,14 +15,10 @@ import matrix;
 
 #if defined(USE_LOGGER)
 import logger;
-#include <source_location>
+
 #include <sstream>
 #include <string>
 #endif /*defined(USE_LOGGER)*/ 
-
-//----------------------------------------------------------------------------------------------------------------------------
-
-using namespace Detail::geometry;
 
 //----------------------------------------------------------------------------------------------------------------------------
 
@@ -34,7 +30,16 @@ export import line;
 
 //----------------------------------------------------------------------------------------------------------------------------
 
-export
+export namespace Geometry
+{
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+namespace Detail
+{
+
+//----------------------------------------------------------------------------------------------------------------------------
+
 template <typename coordinate_t>
 class plain_t
 {
@@ -45,8 +50,9 @@ class plain_t
     static_assert(std::is_same_v<coeff_t, coordinate_t>,
                   "this types must be equals");
 
-    using point_t    = point_t   <coordinate_t>;
-    using line_t     = line_t    <coordinate_t>; 
+    using point_t      =                      point_t     <coordinate_t>;
+    using line_t       =                      line_t      <coordinate_t>; 
+    using matrix_2x2_t = Math::LinearAlgebra::matrix_2x2_t<coordinate_t>;
 
     private:
         // ax + by + cz + d = 0
@@ -130,12 +136,12 @@ bool
 plain_t<coordinate_t>::compare_with_another_plain(const plain_t& plain) const
 {
     return 
-        compare(a_ * plain.b_, plain.a_ * b_, 1e-1) &&
-        compare(a_ * plain.c_, plain.a_ * c_, 1e-1) &&
-        compare(a_ * plain.d_, plain.a_ * d_, 1e-1) &&
-        compare(b_ * plain.c_, plain.b_ * c_, 1e-1) &&
-        compare(b_ * plain.d_, plain.b_ * d_, 1e-1) &&
-        compare(c_ * plain.d_, plain.c_ * d_, 1e-1);
+        Math::Compare::compare<coordinate_t>(a_ * plain.b_, plain.a_ * b_, static_cast<coordinate_t>(1e-1)) &&
+        Math::Compare::compare<coordinate_t>(a_ * plain.c_, plain.a_ * c_, static_cast<coordinate_t>(1e-1)) &&
+        Math::Compare::compare<coordinate_t>(a_ * plain.d_, plain.a_ * d_, static_cast<coordinate_t>(1e-1)) &&
+        Math::Compare::compare<coordinate_t>(b_ * plain.c_, plain.b_ * c_, static_cast<coordinate_t>(1e-1)) &&
+        Math::Compare::compare<coordinate_t>(b_ * plain.d_, plain.b_ * d_, static_cast<coordinate_t>(1e-1)) &&
+        Math::Compare::compare<coordinate_t>(c_ * plain.d_, plain.c_ * d_, static_cast<coordinate_t>(1e-1));
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -144,25 +150,28 @@ template <typename coordinate_t>
 relative_position_t
 plain_t<coordinate_t>::get_intersection_with_another_plain(const plain_t& plain, line_t& intersection_line) const
 {
-    coordinate_t det1 = matrix_2x2_t<coordinate_t>(a_, b_, plain.a_, plain.b_).get_determinate();
+    coordinate_t det1 = matrix_2x2_t(      a_,       b_,
+                                     plain.a_, plain.b_).get_determinate();
 
-    if (!compare_with_null(det1))
+    if (!Math::Compare::compare_with_null(det1))
     {
         det_1_not_null_in_intersection_of_plains(plain, det1, intersection_line);
         return relative_position_t::NORMAL_INTERSECTION;
     }
 
-    coordinate_t det2 = matrix_2x2_t<coordinate_t>(a_, c_, plain.a_, plain.c_).get_determinate();
+    coordinate_t det2 = matrix_2x2_t(      a_,       c_,
+                                     plain.a_, plain.c_).get_determinate();
 
-    if (!compare_with_null(det2))
+    if (!Math::Compare::compare_with_null(det2))
     {
         det_2_not_null_in_intersection_of_plains(plain, det2, intersection_line);
         return relative_position_t::NORMAL_INTERSECTION;
     }
 
-    coordinate_t det3 = matrix_2x2_t<coordinate_t>(b_, c_, plain.b_, plain.c_).get_determinate();
+    coordinate_t det3 = matrix_2x2_t(      b_,       c_,
+                                     plain.b_, plain.c_).get_determinate();
 
-    if (!compare_with_null(det1))
+    if (!Math::Compare::compare_with_null(det1))
     {
         det_3_not_null_in_intersection_of_plains(plain, det3, intersection_line);
         return relative_position_t::NORMAL_INTERSECTION;
@@ -213,7 +222,6 @@ plain_t<coordinate_t>::get_d() const
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
-
 //----------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------
 
@@ -269,9 +277,14 @@ template <typename coordinate_t>
 point_t<coordinate_t>
 plain_t<coordinate_t>::get_second_ref_point_for_intersection_of_plain(const plain_t& plain, const point_t& first_ref_point) const
 {
-    coordinate_t vx = matrix_2x2_t<coordinate_t>(b_, plain.b_, c_, plain.c_).get_determinate();
-    coordinate_t vy = matrix_2x2_t<coordinate_t>(c_, plain.c_, a_, plain.a_).get_determinate();
-    coordinate_t vz = matrix_2x2_t<coordinate_t>(a_, plain.a_, b_, plain.b_).get_determinate();
+    coordinate_t vx = matrix_2x2_t(b_, plain.b_,
+                                   c_, plain.c_).get_determinate();
+
+    coordinate_t vy = matrix_2x2_t(c_, plain.c_,
+                                   a_, plain.a_).get_determinate();
+
+    coordinate_t vz = matrix_2x2_t(a_, plain.a_,
+                                   b_, plain.b_).get_determinate();
 
     return point_t(
         first_ref_point.get_x_coordinate() + vx,
@@ -294,19 +307,30 @@ plain_t<coordinate_t>::get_dump(std::string_view name) const
     std::ostringstream dump;
 
     std::ostringstream f;
-    f << a_ << "x ";
+    
+    bool is_a_0 = Math::Compare::compare_with_null(a_);
+    bool is_b_0 = Math::Compare::compare_with_null(b_);
+    bool is_c_0 = Math::Compare::compare_with_null(c_);
+    bool is_d_0 = Math::Compare::compare_with_null(d_);
 
-    if (!compare_with_null(b_))
+    bool are_all_coordinate_0 = is_a_0 &&
+                                is_b_0 &&
+                                is_c_0 &&
+                                is_d_0;
+
+    if (!is_a_0)
+        f << a_ << "x ";
+
+    if (!is_b_0)
         f << ((b_ > 0) ? "+ " : "") << b_ << "y ";
         
-    if (!compare_with_null(c_))
+    if (!is_c_0)
         f << ((c_ > 0) ? "+ " : "") << c_ << "z ";
 
-    if (!compare_with_null(d_))
+    if (!is_d_0)
         f << ((d_ > 0) ? "+ " : "") << d_;
 
-    f << " = 0";
-
+    f << ((are_all_coordinate_0) ? "all R^3" : " = 0");
 
     dump << "PLAIN "
          << name << "\n{" 
@@ -322,3 +346,6 @@ plain_t<coordinate_t>::get_dump(std::string_view name) const
 )
 
 //----------------------------------------------------------------------------------------------------------------------------
+
+} /* namespace Detail */
+} /* namespace Geometry */

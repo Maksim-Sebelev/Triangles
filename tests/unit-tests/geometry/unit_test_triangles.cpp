@@ -23,7 +23,6 @@ TEST(TesingTriangleFloat, CtorArray)
     EXPECT_FLOAT_EQ(t.get_c_z(), 9.0f);
 }
 
-
 TEST(TestingTriangleDouble, CtorArray)
 {
     triangle_t<long double    > t({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
@@ -240,5 +239,4 @@ TEST(TesingTriangleFloat, IntersectionsOfTrianglesInSamePlain)
 
     EXPECT_TRUE(t1.is_intersect_with_another_triangle(t2));
     EXPECT_TRUE(t2.is_intersect_with_another_triangle(t1));
-
 }

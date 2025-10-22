@@ -20,7 +20,7 @@ function custom_echo_err
     echo -e "${color}${font}${msg}${RESET_CONSOLE_OUTPUT_SETTINGS}" >&2
 }
 
-function check_that_exist
+function check_that_exists
 {
     local programm=$1
     if ! command -v "${programm}" >/dev/null 2>&1; then
@@ -30,9 +30,9 @@ function check_that_exist
     fi
 }
 
-check_that_exist clang-format
-check_that_exist find
-check_that_exist xargs
+check_that_exists clang-format
+check_that_exists find
+check_that_exists xargs
 
 find . -type f \( -name "*.cpp" -o -name "*.hpp" -o -name "*.cppm" \) -print0 | xargs -0 clang-format -i
 

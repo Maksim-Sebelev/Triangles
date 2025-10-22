@@ -1,7 +1,6 @@
 #define COORDINATE_TYPE float
 #include "cringe/create_run_program_file.hpp"
 
-
 /*
 ПОЧЕМУ КОДОГЕНЕРАЦИЯ ЧЕРЕЗ #include - ЭТО ПИК ПРОГРАММИРОВАНИЯ
 

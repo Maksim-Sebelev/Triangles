@@ -11,8 +11,8 @@ TEST(TestingGetTestData, Float_FilStream_1)
     {
         (char*)"as if executable file name",
         (char*) "--input_stream=files",
-        (char*) "../tests/ans/1.ans",
-        (char*) "../tests/dat/1.dat",
+        (char*) "../tests/e2e/ans/1.ans",
+        (char*) "../tests/e2e/dat/1.dat",
     };
 
     test_data_t<float> td = get_test_data<float>(argc, argv);

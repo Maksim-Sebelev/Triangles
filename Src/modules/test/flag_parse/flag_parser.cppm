@@ -18,7 +18,7 @@ export import input_stream;
 
 #if defined(USE_LOGGER)
 import logger;
-#include <source_location>
+
 #endif // defined(USE_LOGGER)
 
 //---------------------------------------------------------------------------------------------------------------
@@ -27,19 +27,54 @@ export module flags_parser;
 
 //---------------------------------------------------------------------------------------------------------------
 
-export class flags_parser
+void set_getopt_args_default_values();
+
+//---------------------------------------------------------------------------------------------------------------
+
+constexpr option long_options[] =
+{
+    {"help"        , no_argument      , 0, 'h'},
+    {"input_stream", required_argument, 0, 'i'},
+    {"verbose"     , no_argument      , 0, 'v'},
+    {""            , 0                , 0,  0 }, // just for safety
+};
+
+//---------------------------------------------------------------------------------------------------------------
+
+using namespace InputData::Detail;
+
+//--------------------------------------------------------------------------------------------------------------
+
+constexpr std::pair<input_stream, std::string> input_stream_flag_values[] =
+{
+    {input_stream::standart_input      , "stdin"},
+    {input_stream::dat_file_stream     , "files"},
+    {input_stream::invalid_input_stream, ""     },
+};
+
+//---------------------------------------------------------------------------------------------------------------
+
+export namespace FlagsParsing
+{
+
+//---------------------------------------------------------------------------------------------------------------
+
+class flags_parser
 {
     public:
         input_stream   get_input_stream                  () const;
         test_files_t   get_test_files                    () const;
         bool           print_result_and_dont_check_answer() const;
+        bool           verbose_output                    () const;
 
         flags_parser() = delete;
         flags_parser(int argc, char* argv[]);
+
     private:
         input_stream  input_stream_                      ;
         test_files_t  test_files_                        ;
         bool          print_result_and_dont_check_answer_;
+        bool          verbose_output_                    ;
 
         struct are_parametrs_already_defined
         {
@@ -50,9 +85,10 @@ export class flags_parser
 
         are_parametrs_already_defined are_parametrs_already_defined_;
 
-        void         parse_flag_input_stream                         ();
         [[noreturn]]        
         void         parse_flag_help                                 ();
+        void         parse_flag_input_stream                         ();
+        void         parse_verbose_flag                              ();
         void         parse_not_a_flag                                (const char* argument); // maybe test file name, maybe invalid option
 
         void         define_input_stream                             ();
@@ -87,25 +123,6 @@ export class flags_parser
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
-// почему бы не хранить это в global scope, если у меня модули?
-const option long_options[] =
-{
-    {"input_stream", required_argument, 0, 'i'},
-    {"help"        , no_argument      , 0, 'h'},
-    {""            , 0                , 0,  0 }, // just for safety
-};
-
-//---------------------------------------------------------------------------------------------------------------
-
-const std::pair<input_stream, std::string> input_stream_flag_values[] =
-{
-    {input_stream::standart_input      , "stdin"},
-    {input_stream::dat_file_stream     , "files"},
-    {input_stream::invalid_input_stream, ""      },
-};
-
-//---------------------------------------------------------------------------------------------------------------
-
 // class public methods
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
@@ -113,24 +130,25 @@ const std::pair<input_stream, std::string> input_stream_flag_values[] =
 
 flags_parser::flags_parser(int argc, char* argv[]) :
 input_stream_                      (input_stream::standart_input), // default value of input_stream_
-test_files_                        ("", "")                      , // we don`t know files before parsing args
-print_result_and_dont_check_answer_(true)                          // in default we get answer in stdin
+test_files_                        ("", ""), // we don`t know files before parsing args
+print_result_and_dont_check_answer_(true),                          // in default we get answer in stdin
+verbose_output_                    (false)
 {
     for (int options_iterator = 1; options_iterator < argc; options_iterator++)
     {
-        int option = getopt_long(argc, argv, "i::h", long_options, nullptr);
+        int option = getopt_long(argc, argv, "i::hv", long_options, nullptr);
     
         switch (option)
         {
-            case 'i': parse_flag_input_stream();                          continue;
-            case 'h': parse_flag_help        ();                          continue;
+            case 'h': parse_flag_help        ();                       continue;
+            case 'i': parse_flag_input_stream();                       continue;
+            case 'v': parse_verbose_flag     ();                       continue;
             case -1 : parse_not_a_flag       (argv[options_iterator]); continue;
             default : builtin_unreachable_wrapper("all unknown options must be pase in <case -1:>");
         }
     }
-    // set getopt args to default values
-    optarg = nullptr;
-    optind = 1;
+
+    set_getopt_args_default_values();
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -159,57 +177,17 @@ bool flags_parser::print_result_and_dont_check_answer() const
 
 //---------------------------------------------------------------------------------------------------------------
 
+bool flags_parser::verbose_output() const
+{
+    return verbose_output_;
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
 // class private methods
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
-
-void flags_parser::parse_flag_input_stream()
-{
-    input_stream_ = get_type_of_input_stream();
-
-    if (input_stream_ == input_stream::dat_file_stream)
-        print_result_and_dont_check_answer_ = false;
-
-    if (input_stream_ == input_stream::invalid_input_stream)
-        invalid_type_of_input_stream(); // exit 1
-
-    define_input_stream();
-}
-
-//---------------------------------------------------------------------------------------------------------------
-
-void flags_parser::parse_not_a_flag(const char* argument)
-{
-    assert(argument);
-
-    if (is_string_test_file_name(argument))
-    {
-        if (!are_parametrs_already_defined_.is_define_input_stream)
-            define_test_file_before_input_stream(); // exit 1
-
-        test_files_.test_file = argument;
-        define_test_file();
-
-        return;
-    }
-
-    if (is_string_answer_file_name(argument))
-    {
-        if (!are_parametrs_already_defined_.is_define_input_stream)
-            define_answer_file_before_input_stream(); // exit 1
-
-        test_files_.answer_file = argument;
-        define_answer_file();
-
-        return;
-    }
-
-    undefined_option(argument); // exit 1
-}
-
-//---------------------------------------------------------------------------------------------------------------
-
 
 [[noreturn]]
 void flags_parser::parse_flag_help()
@@ -265,6 +243,59 @@ void flags_parser::parse_flag_help()
     "Good luck, I love you :)\n";
 
     exit(EXIT_SUCCESS); // good exit :)
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+void flags_parser::parse_verbose_flag()
+{
+    verbose_output_ = true;
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+void flags_parser::parse_flag_input_stream()
+{
+    input_stream_ = get_type_of_input_stream();
+
+    if (input_stream_ == input_stream::dat_file_stream)
+        print_result_and_dont_check_answer_ = false;
+
+    if (input_stream_ == input_stream::invalid_input_stream)
+        invalid_type_of_input_stream(); // exit 1
+
+    define_input_stream();
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+void flags_parser::parse_not_a_flag(const char* argument)
+{
+    assert(argument);
+
+    if (is_string_test_file_name(argument))
+    {
+        if (!are_parametrs_already_defined_.is_define_input_stream)
+            define_test_file_before_input_stream(); // exit 1
+
+        test_files_.test_file = argument;
+        define_test_file();
+
+        return;
+    }
+
+    if (is_string_answer_file_name(argument))
+    {
+        if (!are_parametrs_already_defined_.is_define_input_stream)
+            define_answer_file_before_input_stream(); // exit 1
+
+        test_files_.answer_file = argument;
+        define_answer_file();
+
+        return;
+    }
+
+    undefined_option(argument); // exit 1
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -446,6 +477,18 @@ bool flags_parser::is_string_answer_file_name(const std::string& answer_file)
 //---------------------------------------------------------------------------------------------------------------
 
 #undef check_extension
+
+//---------------------------------------------------------------------------------------------------------------
+
+} /* namespace FlagsParsing */
+
+//---------------------------------------------------------------------------------------------------------------
+
+void set_getopt_args_default_values()
+{
+    optarg = nullptr;
+    optind = 1;
+}
 
 //---------------------------------------------------------------------------------------------------------------
 

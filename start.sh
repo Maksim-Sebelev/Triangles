@@ -28,7 +28,7 @@ function skip_line_in_console
     echo
 }
 
-function check_that_exist
+function check_that_exists
 {
     local programm=$1
 
@@ -41,6 +41,29 @@ function check_that_exist
     return 0
 }
 
+function need_logger
+{
+    for option in "$@"
+    do
+        if [ "$option" = "use-logger" ]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+function need_verbose_output
+{
+    for option in "$@"
+    do
+        if [ "$option" = "verbose" ]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
 
 build_dir="build"
 source_dir="Src"
@@ -56,13 +79,13 @@ fi
 # check dependencies
 custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "Checking dependencies..."
 
-check_that_exist cmake || exit 1
+check_that_exists cmake || exit 1
 custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "cmake   was found"
 
-check_that_exist clang++ || exit 1
+check_that_exists clang++ || exit 1
 custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "clang++ was found"
 
-check_that_exist ninja || exit 1
+check_that_exists ninja || exit 1
 custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "ninja   was found"
 
 custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "All dependencies are found, continue to work..."
@@ -71,13 +94,29 @@ skip_line_in_console
 # generating build system with optional logger
 custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "Generating build system..."
 
-# TODO: change Debug build type to Release
-if [ $# -eq 1 ] && [ "$1" = "use-logger" ]; then
+if need_logger "$@" && need_verbose_output "$@"; then
+    custom_echo "${CONSOLE_COLOR_WHITE}" "" "cmake -G Ninja -S ${source_dir}/ -B ${build_dir}/ -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DUSE_LOGGER=1 -DVERBOSE_OUTPUT=1 -DCMAKE_EXPORT_COMPILE_COMMANDS=1"
+    cmake -G Ninja -S "${source_dir}/" -B "${build_dir}/" \
+        -DCMAKE_CXX_COMPILER=clang++ \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DUSE_LOGGER=1 \
+        -DVERBOSE_OUTPUT=1 \
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+
+elif need_logger "$@"; then
     custom_echo "${CONSOLE_COLOR_WHITE}" "" "cmake -G Ninja -S ${source_dir}/ -B ${build_dir}/ -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DUSE_LOGGER=1 -DCMAKE_EXPORT_COMPILE_COMMANDS=1"
     cmake -G Ninja -S "${source_dir}/" -B "${build_dir}/" \
         -DCMAKE_CXX_COMPILER=clang++ \
         -DCMAKE_BUILD_TYPE=Release \
         -DUSE_LOGGER=1 \
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+
+elif need_verbose_output "$@"; then
+    custom_echo "${CONSOLE_COLOR_WHITE}" "" "cmake -G Ninja -S ${source_dir}/ -B ${build_dir}/ -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DVERBOSE_OUTPUT=1 -DCMAKE_EXPORT_COMPILE_COMMANDS=1"
+    cmake -G Ninja -S "${source_dir}/" -B "${build_dir}/" \
+        -DCMAKE_CXX_COMPILER=clang++ \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DVERBOSE_OUTPUT=1 \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=1
 else
     custom_echo "${CONSOLE_COLOR_WHITE}" "" "cmake -G Ninja -S ${source_dir}/ -B ${build_dir}/ -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=1"

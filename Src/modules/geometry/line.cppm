@@ -15,14 +15,9 @@ import linear_systems;
 
 #if defined(USE_LOGGER)
 import logger;
-#include <source_location>
 #include <sstream>
 #include <string>
 #endif // defined(USE_LOGGER)
-
-//----------------------------------------------------------------------------------------------------------------------------
-
-using namespace Detail::geometry;
 
 //----------------------------------------------------------------------------------------------------------------------------
 
@@ -34,30 +29,41 @@ export import point;
 
 //----------------------------------------------------------------------------------------------------------------------------
 
-export template <typename coordinate_t> class line_t;
-export template <typename coordinate_t> class segment_t;
+export namespace Geometry
+{
 
 //----------------------------------------------------------------------------------------------------------------------------
 
-export
+namespace Detail
+{
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+template <typename coordinate_t> class line_t;
+template <typename coordinate_t> class segment_t;
+
+//----------------------------------------------------------------------------------------------------------------------------
+
 template <typename coordinate_t>
 class line_t
 {
     static_assert(std::is_floating_point_v<coordinate_t>,
                 "In line_t as template type excpect only floating point type.");
 
-    using point_t    = point_t   <coordinate_t>;
-    using segment_t  = segment_t <coordinate_t>;
+    using point_t                         =                      point_t            <coordinate_t>;
+    using segment_t                       =                      segment_t          <coordinate_t>;
 
-    using coeff_t = coordinate_t;
-    static_assert(std::is_same_v<coeff_t, coordinate_t>,
-                  "this types must be equals");
+    using vector_2_t                      = Math::LinearAlgebra::vector_2_t         <coordinate_t>;
+    using matrix_2x2_t                    = Math::LinearAlgebra::matrix_2x2_t       <coordinate_t>;
+    using linear_system_2x2_t             = Math::LinearAlgebra::linear_system_2x2_t<coordinate_t>;
+
+    using square_linear_system_solution_t = Math::LinearAlgebra::square_linear_system_solution_t;
 
     private:
         point_t ref_point_1_;
         point_t ref_point_2_;
 
-        void set_intersection_point(point_t& intersection_point, const vector_2_t<coordinate_t>& solution) const;
+        void set_intersection_point(point_t& intersection_point, const vector_2_t& solution) const;
 
     public:
         line_t() = default;
@@ -148,9 +154,9 @@ line_t<coordinate_t>::compare_with_another_line(const line_t& line) const
 
     const coordinate_t b2  = line.ref_point_1_.get_y_coordinate() -      ref_point_1_.get_y_coordinate();
 
-    const matrix_2x2_t       <coordinate_t> A(a11, a12, a21, a22);
-    const vector_2_t         <coordinate_t> b(b1, b2);
-    const linear_system_2x2_t<coordinate_t> linear_system(A, b);
+    const matrix_2x2_t        A(a11, a12, a21, a22);
+    const vector_2_t          b(b1, b2);
+    const linear_system_2x2_t linear_system(A, b);
 
     square_linear_system_solution_t solution_type = linear_system.get_solution_type();
 
@@ -162,10 +168,10 @@ line_t<coordinate_t>::compare_with_another_line(const line_t& line) const
     
     const coordinate_t b3  = line.ref_point_1_.get_z_coordinate() -      ref_point_1_.get_z_coordinate();
     
-    const matrix_2x2_t       <coordinate_t> A_2(a11, a12, a31, a32);
-    const vector_2_t         <coordinate_t> b_2(b1, b3);
+    const matrix_2x2_t        A_2(a11, a12, a31, a32);
+    const vector_2_t          b_2(b1, b3);
 
-    const linear_system_2x2_t<coordinate_t> linear_system_2(A_2, b_2);
+    const linear_system_2x2_t linear_system_2(A_2, b_2);
 
     solution_type = linear_system_2.get_solution_type();
 
@@ -190,11 +196,11 @@ line_t<coordinate_t>::get_intersection_with_another_line(const line_t& line, poi
 
     const coordinate_t b2  = line.ref_point_1_.get_y_coordinate() -      ref_point_1_.get_y_coordinate();
 
-    const matrix_2x2_t       <coordinate_t> A(a11, a12, a21, a22);
-    const vector_2_t         <coordinate_t> b(b1, b2);
-    const linear_system_2x2_t<coordinate_t> linear_system(A, b);
+    const matrix_2x2_t        A(a11, a12, a21, a22);
+    const vector_2_t          b(b1, b2);
+    const linear_system_2x2_t linear_system(A, b);
 
-    vector_2_t         <coordinate_t> solution;
+    vector_2_t                        solution;
     square_linear_system_solution_t   solution_type = linear_system.get_solution(solution);
 
     switch (solution_type)
@@ -210,10 +216,9 @@ line_t<coordinate_t>::get_intersection_with_another_line(const line_t& line, poi
             
             const coordinate_t b3  = line.ref_point_1_.get_z_coordinate() -      ref_point_1_.get_z_coordinate();
             
-            const matrix_2x2_t       <coordinate_t> A_2(a11, a12, a31, a32);
-            const vector_2_t         <coordinate_t> b_2(b1, b3);
-
-            const linear_system_2x2_t<coordinate_t> linear_system2(A_2, b_2);
+            const matrix_2x2_t        A_2(a11, a12, a31, a32);
+            const vector_2_t          b_2(b1, b3);
+            const linear_system_2x2_t linear_system2(A_2, b_2);
 
             solution_type = linear_system2.get_solution(solution);
 
@@ -249,9 +254,10 @@ line_t<coordinate_t>::get_intersection_with_another_line(const line_t& line, poi
             
     const coordinate_t b3  = line.ref_point_1_.get_z_coordinate() -      ref_point_1_.get_z_coordinate();
 
-    vector_2_t<coordinate_t> third_equation(a31, a32);
+    vector_2_t third_equation(a31, a32);
 
-    if (!compare<coordinate_t>(third_equation.get_mul_by_another_vector(solution), b3, 1e-3))
+    if (!Math::Compare::compare<coordinate_t>
+        (third_equation.get_mul_by_another_vector(solution), b3, static_cast<coordinate_t>(1e-3)))
     {
         intersection_point.made_invalid();
         return relative_position_t::NO_INTERSECTION;
@@ -293,7 +299,7 @@ line_t<coordinate_t>::get_intersection_with_segment(const segment_t& segment, po
 
 template <typename coordinate_t>
 void
-line_t<coordinate_t>::set_intersection_point(point_t& intersection_point, const vector_2_t<coordinate_t>& solution) const
+line_t<coordinate_t>::set_intersection_point(point_t& intersection_point, const vector_2_t& solution) const
 {
     coordinate_t solution_a1 = solution.get_a1();
 
@@ -354,6 +360,9 @@ line_t<coordinate_t>::get_dump(std::string_view name) const
 }
 )
 
+
+//----------------------------------------------------------------------------------------------------------------------------
+
 // segment
 //----------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------
@@ -363,15 +372,15 @@ line_t<coordinate_t>::get_dump(std::string_view name) const
 //----------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------
 
-export
 template <typename coordinate_t>
 class segment_t
 {
     static_assert(std::is_floating_point_v<coordinate_t>,
                 "In segment_t as template type excpect only floating point type.");
 
-    using point_t      = point_t     <coordinate_t>;
-    using matrix_2x2_t = matrix_2x2_t<coordinate_t>;
+    using point_t      =                      point_t     <coordinate_t>;
+    using vector_2_t   = Math::LinearAlgebra::vector_2_t  <coordinate_t>;
+    using matrix_2x2_t = Math::LinearAlgebra::matrix_2x2_t<coordinate_t>;
 
     private:
         point_t begin_point_;
@@ -678,5 +687,10 @@ segment_t<coordinate_t>::get_dump(std::string_view name) const
     return dump.str();
 }
 )
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+} /* namespace Dateil */
+} /* namespace Geometry */
 
 //----------------------------------------------------------------------------------------------------------------------------

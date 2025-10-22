@@ -3,7 +3,7 @@
 
 import plain;
 
-using namespace Detail::geometry;
+using namespace Detail::Geometry;
 
 using fpoint = point_t<float>;
 using dpoint = point_t<double>;

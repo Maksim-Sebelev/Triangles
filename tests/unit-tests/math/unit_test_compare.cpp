@@ -4,6 +4,8 @@
 
 import compare;
 
+using namespace Math::Compare;
+
 //---------------------------------------------------------------------------------------------------------------
 
 TEST(MathTesing, EqualOfDoubles)

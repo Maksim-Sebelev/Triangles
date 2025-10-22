@@ -17,20 +17,17 @@ import parse_test_result;
 
 int main(int argc, char* argv[])
 {
-    ON_DEBUG(
-    std::cout << GREEN BOLD "Running:\n" << VIOLET ITALIC;
-    for (int i = 0; i < argc; i++)
-        std::cout << argv[i] << " ";
+    InputData  ::test_data_t     <COORDINATE_TYPE> test_data      = InputData  ::get_test_data    <COORDINATE_TYPE>(argc          , argv     );
+    RunProgram ::program_result_t<COORDINATE_TYPE> program_result                                                  (test_data                );
+    ParseResult::test_result_t                     test_result    = ParseResult::parse_test_result<COORDINATE_TYPE>(program_result, test_data);
 
-    std::cout << RESET_CONSOLE_OUT << std::endl << std::endl;
-    )
+    switch (test_result)
+    {
+        case ParseResult::test_result_t::TEST_PASSED:       return EXIT_SUCCESS;
+        case ParseResult::test_result_t::TEST_FAILED:       return EXIT_FAILURE;
+        case ParseResult::test_result_t::DONT_CHECK_RESULT: return EXIT_SUCCESS;
+        default: builtin_unreachable_wrapper("undefined test result type. maybe you forgot to add new value in switch");
+    }
 
-    test_data_t     <COORDINATE_TYPE> test_data      = get_test_data    <COORDINATE_TYPE>(argc          , argv     );
-    program_result_t<COORDINATE_TYPE> program_result                                     (test_data                );
-    test_result_t                     test_result    = parse_test_result<COORDINATE_TYPE>(program_result, test_data);
-
-    if (test_result == test_result_t::TEST_FAILED)
-        return EXIT_FAILURE;
-
-    return EXIT_SUCCESS;
+    builtin_unreachable_wrapper("we must return in switch");
 }

@@ -74,6 +74,11 @@ function(target_debug_options target)
                 >
         )
 
+        target_compile_definitions(${target}
+            PRIVATE
+                $<$<CONFIG:Debug>:_DEBUG>
+        )
+
         # linking sanitizers
         target_link_options(${target}
             PRIVATE
@@ -328,6 +333,18 @@ add_custom_target(${REBUILD_TARGET}
 # =============================================================================================================
 # TODO: compile logger as external project (ExternalProject_Add)
 # add logger if defined USE_LOGGER flag
+
+
+if(NOT TARGET spdlog)
+    # Stand-alone build
+    find_package(spdlog REQUIRED)
+endif()
+
+# ---------------------------------------------------------------------------------------
+# Example of using pre-compiled library
+# ---------------------------------------------------------------------------------------
+
+
 if (USE_LOGGER)
     message("-- Adding logger")
 
@@ -362,6 +379,8 @@ if (USE_LOGGER)
 
     foreach(target_that_use_logger ${TARGETS_USING_LOGGER})
         add_logger(${target_that_use_logger})
+        target_link_libraries(${target_that_use_logger}
+         PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
     endforeach()
 
     set(CMAKE_BUILD_TYPE ${MAIN_PROJECT_BUILD_TYPE})
@@ -412,7 +431,6 @@ function(target_unit_test unit_test_target_name unit_test_src modules_library)
     target_debug_options(${unit_test_target_name})
 endfunction(target_unit_test)
 
-
 # =============================================================================================================
 
 # creating unit-tests
@@ -420,7 +438,7 @@ endfunction(target_unit_test)
 # =============================================================================================================
 
 # set name of target to build all unit-tests
-set(BUILD_ALL_UNIT_TESTS_TARGET ready_for_unit_tests)
+set(BUILD_ALL_UNIT_TESTS_TARGET build_test)
 
 # set dir with unit-tests
 set(UNIT_TEST_DIR ${PROJECT_SOURCE_DIR}/../tests/unit-tests)
@@ -703,7 +721,6 @@ target_e2e_test(${DOUBLE_TRIANGLES_EXE}
 
 # =============================================================================================================
 
-# TODO: back gtest
 foreach(unit_test_target ${ALL_UNIT_TESTS_TARGET})
     gtest_discover_tests(${unit_test_target})
 endforeach()

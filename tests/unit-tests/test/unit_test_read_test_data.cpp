@@ -3,7 +3,7 @@
 import triangle;
 import read_test_data;
 
-#define WAY_FROM_BUILD_TO_THIS_TEST_DATA_DIR "../tests/dat/"
+#define WAY_FROM_BUILD_TO_THIS_TEST_DATA_DIR "../tests/e2e/dat/"
 
 #define create_test_data_float(n) std::string_view dat_##n(WAY_FROM_BUILD_TO_THIS_TEST_DATA_DIR #n ".dat");\
 test_input_t<float> td##n(dat_##n)

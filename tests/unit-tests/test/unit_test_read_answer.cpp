@@ -4,7 +4,7 @@
 
 import read_test_answer;
 
-#define WAY_FROM_BUILD_TO_THIS_TEST_DATA_DIR "../tests/ans/"
+#define WAY_FROM_BUILD_TO_THIS_TEST_DATA_DIR "../tests/e2e/ans/"
 
 #define create_test_answer(n) std::string_view ans_##n(WAY_FROM_BUILD_TO_THIS_TEST_DATA_DIR #n ".ans"); \
 test_answer_t test_answer_##n(ans_##n)

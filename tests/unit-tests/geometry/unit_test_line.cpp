@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "relative_positions.hpp"
 
-using namespace Detail::geometry;
+using namespace Detail::Geometry;
 
 import line;
 

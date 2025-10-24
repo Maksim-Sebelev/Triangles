@@ -144,7 +144,7 @@ verbose_output_                    (false)
             case 'i': parse_flag_input_stream();                       continue;
             case 'v': parse_verbose_flag     ();                       continue;
             case -1 : parse_not_a_flag       (argv[options_iterator]); continue;
-            default : builtin_unreachable_wrapper("all unknown options must be pase in <case -1:>");
+            default : undefined_option       (argv[options_iterator]); continue;
         }
     }
 

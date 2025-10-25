@@ -1,3 +1,17 @@
+/*
+before include this file:
+#define COORDINATE_TYPE <some floating point type>
+
+the full usage example:
+// some .cpp:
+#define COORDINATE_TYPE float
+#include "cringe/create_run_porgram_file.hpp"
+
+// or:
+#define COORDINATE_TYPE long double
+#include "cringe/create_run_porgram_file.hpp"
+*/
+
 #if ! defined(COORDINATE_TYPE)
 static_assert(false, "COORDINATE_TYPE not defined");
 #endif /* ! defined(COORDINATE_TYPE) */

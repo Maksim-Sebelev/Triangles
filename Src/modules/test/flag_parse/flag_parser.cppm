@@ -33,10 +33,11 @@ void set_getopt_args_default_values();
 
 constexpr option long_options[] =
 {
-    {"help"        , no_argument      , 0, 'h'},
-    {"input_stream", required_argument, 0, 'i'},
-    {"verbose"     , no_argument      , 0, 'v'},
-    {""            , 0                , 0,  0 }, // just for safety
+    {"help"         , no_argument      , 0, 'h'},
+    {"input_stream" , required_argument, 0, 'i'},
+    {"verbose"      , no_argument      , 0, 'v'},
+    {"bad_triangles", no_argument      , 0, 'b'},
+    {""             , 0                , 0,  0 }, /* just for safety */
 };
 
 //---------------------------------------------------------------------------------------------------------------
@@ -66,6 +67,7 @@ class flags_parser
         test_files_t   get_test_files                    () const;
         bool           print_result_and_dont_check_answer() const;
         bool           verbose_output                    () const;
+        bool           bad_triangles                     () const;
 
         flags_parser() = delete;
         flags_parser(int argc, char* argv[]);
@@ -75,6 +77,7 @@ class flags_parser
         test_files_t  test_files_                        ;
         bool          print_result_and_dont_check_answer_;
         bool          verbose_output_                    ;
+        bool          bad_triangles_                     ;
 
         struct are_parametrs_already_defined
         {
@@ -89,6 +92,7 @@ class flags_parser
         void         parse_flag_help                                 ();
         void         parse_flag_input_stream                         ();
         void         parse_verbose_flag                              ();
+        void         parse_bad_triangles_flag                        ();
         void         parse_not_a_flag                                (const char* argument); // maybe test file name, maybe invalid option
 
         void         define_input_stream                             ();
@@ -130,21 +134,23 @@ class flags_parser
 
 flags_parser::flags_parser(int argc, char* argv[]) :
 input_stream_                      (input_stream::standart_input), // default value of input_stream_
-test_files_                        ("", ""), // we don`t know files before parsing args
-print_result_and_dont_check_answer_(true),                          // in default we get answer in stdin
-verbose_output_                    (false)
+test_files_                        ("", ""                      ), // we don`t know files before parsing args
+print_result_and_dont_check_answer_(true                        ), // in default we get answer in stdin
+verbose_output_                    (false                       ), // in default we give minimun informations about program result
+bad_triangles_                     (false                       )  // in default we think, that in input can NOT be invalid triangles
 {
     for (int options_iterator = 1; options_iterator < argc; options_iterator++)
     {
-        int option = getopt_long(argc, argv, "i::hv", long_options, nullptr);
+        int option = getopt_long(argc, argv, "i::hvb", long_options, nullptr);
     
         switch (option)
         {
-            case 'h': parse_flag_help        ();                       continue;
-            case 'i': parse_flag_input_stream();                       continue;
-            case 'v': parse_verbose_flag     ();                       continue;
-            case -1 : parse_not_a_flag       (argv[options_iterator]); continue;
-            default : undefined_option       (argv[options_iterator]); continue;
+            case 'h': parse_flag_help         ();                       continue;
+            case 'i': parse_flag_input_stream ();                       continue;
+            case 'v': parse_verbose_flag      ();                       continue;
+            case 'b': parse_bad_triangles_flag();                       continue;
+            case -1 : parse_not_a_flag        (argv[options_iterator]); continue;
+            default : undefined_option        (argv[options_iterator]); continue;
         }
     }
 
@@ -180,6 +186,13 @@ bool flags_parser::print_result_and_dont_check_answer() const
 bool flags_parser::verbose_output() const
 {
     return verbose_output_;
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+bool flags_parser::bad_triangles() const
+{
+    return bad_triangles_;
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -250,6 +263,13 @@ void flags_parser::parse_flag_help()
 void flags_parser::parse_verbose_flag()
 {
     verbose_output_ = true;
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+void flags_parser::parse_bad_triangles_flag()
+{
+    bad_triangles_ = true;
 }
 
 //---------------------------------------------------------------------------------------------------------------

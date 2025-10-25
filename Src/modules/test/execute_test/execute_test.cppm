@@ -12,7 +12,9 @@ module;
 #include "custom_console_output.hpp"
 
 import triangle;
+import octree;
 import get_test_data;
+
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -30,19 +32,17 @@ class program_result_t
 {
     private: /* what about comment like this? i think its comfortable to visually separate variables from methods*/
         //--------------------- varibles -----------------------------------
-
         bool                no_input_ = false;
 
         size_t              good_triangles_quant_     ;
         std::vector<size_t> numbers_of_good_triangles_;
 
         //--------------------- methods ------------------------------------
+        void                no_input_action      ();
 
         bool                is_index_out_of_range(size_t i) const;
         [[noreturn]]
         void                index_out_of_range   (size_t i) const;
-        [[noreturn]]
-        void                no_input_triangles   ()         const;
 
         //--------------------------------------------------------
 
@@ -51,10 +51,12 @@ class program_result_t
 
         program_result_t(const InputData::test_data_t<coordinate_t>& test_data);
 
-        bool   no_input                     ()         const;
+        bool                no_input                     ()         const;
 
-        size_t get_good_triangles_quantity  ()         const;
-        size_t get_number_of_i_good_triangle(size_t i) const;
+        size_t              get_good_triangles_quantity  ()         const;
+        size_t              get_number_of_i_good_triangle(size_t i) const;
+
+        std::vector<size_t> get_triangles                ()         const;
 
         //--------------------------------------------------------
 };
@@ -63,47 +65,36 @@ class program_result_t
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
-
 template <typename coordinate_t>
 program_result_t<coordinate_t>::program_result_t(const InputData::test_data_t<coordinate_t>& test_data)
 {
     const size_t triangles_quant = test_data.get_triangles_quantity();
 
-    std::vector<bool> is_triangle_good(triangles_quant, false); // is_triangle_good[i] = true, if triagnles is good. = false if not
-
     if (triangles_quant == 0)
     {
-        no_input_             = true;
-        good_triangles_quant_ = 0   ;
+        no_input_action();
         return;
     }
 
-    for (size_t i = 0; i + 1 < triangles_quant; i++)
-    {
-        for (size_t j = i + 1; j < triangles_quant; j++)
-        {
-            if (is_triangle_good[i] && is_triangle_good[j]) continue; // skip if i and j triangles already are good
+    const bool bad_triangles = test_data.bad_triangles();
 
-            const Geometry::triangle_t<coordinate_t> triangle_i = test_data.get_i_triangle(i);
-            const Geometry::triangle_t<coordinate_t> triangle_j = test_data.get_i_triangle(j);
+    Geometry::octree_t tree(test_data.get_triangles(), bad_triangles);
 
-            if (!triangle_i.is_intersect_with_another_triangle(triangle_j)) continue;
+    tree.find_intersections();
 
-            is_triangle_good[i] = true;
-            is_triangle_good[j] = true;
-        }
+    ON_LOGGER(tree.dump());
 
-        if (!is_triangle_good[i]) continue;
+    numbers_of_good_triangles_ = tree                      .get_good_triangles();
+    good_triangles_quant_      = numbers_of_good_triangles_.size              ();
+}
 
-        numbers_of_good_triangles_.push_back(i);
-    }
+//---------------------------------------------------------------------------------------------------------------
 
-    const size_t last_triangle_index = triangles_quant - 1;
-
-    if (is_triangle_good[last_triangle_index]) // we parse this case here, because in cycle we can't push last triangle
-        numbers_of_good_triangles_.push_back(last_triangle_index);
-
-    good_triangles_quant_ = numbers_of_good_triangles_.size();
+template <typename coordinate_t>
+std::vector<size_t>
+program_result_t<coordinate_t>::get_triangles() const
+{
+    return numbers_of_good_triangles_;
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -165,6 +156,16 @@ program_result_t<coordinate_t>::index_out_of_range(size_t i) const
               << std::endl;
 
     exit(EXIT_FAILURE);
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+template <typename coordinate_t>
+void
+program_result_t<coordinate_t>::no_input_action()
+{
+    no_input_             = true;
+    good_triangles_quant_ = 0   ;
 }
 
 //---------------------------------------------------------------------------------------------------------------

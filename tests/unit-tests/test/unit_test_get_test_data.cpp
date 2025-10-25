@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
 
-
 import triangle;
 import get_test_data;
+
+using namespace InputData;
 
 TEST(TestingGetTestData, Float_FilStream_1)
 {

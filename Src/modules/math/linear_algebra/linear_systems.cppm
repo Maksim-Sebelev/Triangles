@@ -3,7 +3,8 @@ module;
 //----------------------------------------------------------------------------------------------------------------------------
 
 #include <cmath>
-#include <cassert>
+
+#include "global.hpp"
 
 import compare;
 
@@ -95,9 +96,9 @@ template <typename number_t>
 square_linear_system_solution_t
 linear_system_2x2_t<number_t>::get_solution(vector_2_t& solution) const
 {
-    number_t detA   = A_.get_determinate();
-    number_t deltaX = matrix_2x2_t(b_               , A_.get_column_2()).get_determinate();
-    number_t deltaY = matrix_2x2_t(A_.get_column_1(), b_               ).get_determinate();
+    const number_t detA   = A_.get_determinate();
+    const number_t deltaX = matrix_2x2_t(b_               , A_.get_column_2()).get_determinate();
+    const number_t deltaY = matrix_2x2_t(A_.get_column_1(), b_               ).get_determinate();
 
     if (Math::Compare::compare_with_null<number_t>(detA))
     {
@@ -111,8 +112,8 @@ linear_system_2x2_t<number_t>::get_solution(vector_2_t& solution) const
         return square_linear_system_solution_t::NO_SOLUTIONS;
     }
 
-    number_t x1 = deltaX / detA; assert(!std::isnan(x1));
-    number_t x2 = deltaY / detA; assert(!std::isnan(x2));
+    const number_t x1 = deltaX / detA; msg_assert(!std::isnan(x1) && !std::isinf(x1), "we have parse detA = 0 before");
+    const number_t x2 = deltaY / detA; msg_assert(!std::isnan(x2) && !std::isinf(x2), "we have parse detA = 0 before");
 
     solution.set_a1(x1);
     solution.set_a2(x2);

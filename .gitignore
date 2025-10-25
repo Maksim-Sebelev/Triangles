@@ -1,4 +1,4 @@
-# my vscode settings
+# vscode personal settings
 .vscode/
 
 # workdir, here are files created with cmake
@@ -7,11 +7,17 @@ build/
 # dir with `tree` command outpur, needed for readme
 project_struct/
 
-# clangd cache
+# clangd cache. auto generated with clangd
 .cache/
 
-# directory for logger output
+# logger output
 log/
 
-# xexexe :)
+# start.sh analogue shell-script with personally logger settings
 my_start.sh
+
+# tmp files and some experiments with project
+tmp
+
+# shell script to run some test (need for debug)
+run_test.sh

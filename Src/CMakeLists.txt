@@ -2,16 +2,14 @@ cmake_minimum_required(VERSION 3.28) # 3.28 for modules
 
 project(Triangles
     LANGUAGES CXX
-    VERSION 1.1
+    VERSION 2.0
 )
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # =============================================================================================================
-# function to set some sanitezers and flags in debug and release versions
-
-# =============================================================================================================
+# functions to add some debug options and sanitizers to target in Debug mode
 
 function(target_debug_options target)
     if (MSVC) # правда что ли?
@@ -111,10 +109,10 @@ target_sources(${MATH_LIB}
         FILE_SET CXX_MODULES
         TYPE CXX_MODULES
         FILES
-            ${MATH_MODULE_DIR}/compare.cppm
-            ${MATH_MODULE_DIR}/vector.cppm
-            ${MATH_MODULE_DIR}/matrix.cppm
-            ${MATH_MODULE_DIR}/linear_systems.cppm
+            ${MATH_MODULE_DIR}/compare/compare.cppm
+            ${MATH_MODULE_DIR}/linear_algebra/vector.cppm
+            ${MATH_MODULE_DIR}/linear_algebra/matrix.cppm
+            ${MATH_MODULE_DIR}/linear_algebra/linear_systems.cppm
 )
 
 target_include_directories(${MATH_LIB}
@@ -123,111 +121,140 @@ target_include_directories(${MATH_LIB}
 )
 
 # NOT default cmake functions
-# this is my function, defined in 11 line of this `CMakeLists.txt` file
-# set some compile options for run_trinagles
+# this is my function, defined in 14 line of this `CMakeLists.txt` file
+# set some compile options for math_lib
 target_debug_options(${MATH_LIB})
 
 # =============================================================================================================
 
 set(GEOMETRY_MODULES_DIR ${MODULES_DIR}/geometry)
-set(GEOMETRY_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include/geometry)
 
 # =============================================================================================================
 
-set(HELP_GEOMETRY_LIB help_geometry_lib)
+set(GLOBAL_GEOMETRY_LIB _global_geometry)
+add_library(${GLOBAL_GEOMETRY_LIB})
+
+set(GLOBAL_GEOMETRY_MODULES_DIR ${GEOMETRY_MODULES_DIR}/global)
+
+target_sources(${GLOBAL_GEOMETRY_LIB}
+    PUBLIC
+        FILE_SET CXX_MODULES
+        TYPE     CXX_MODULES
+        FILES
+            ${GLOBAL_GEOMETRY_MODULES_DIR}/constants.cppm
+            ${GLOBAL_GEOMETRY_MODULES_DIR}/relative_positions.cppm
+)
+
+target_include_directories(${GLOBAL_GEOMETRY_LIB}
+    PRIVATE
+        ${GLOBAL_INCLUDE_DIR}
+)
+
+# NOT default cmake functions
+# this is my function, defined in 14 line of this `CMakeLists.txt` file
+# set some compile options for global_geometry_lib
+target_debug_options(${GLOBAL_GEOMETRY_LIB})
+
+# =============================================================================================================
+
+set(HELP_GEOMETRY_LIB _help_geometry)
 add_library(${HELP_GEOMETRY_LIB})
+
+set(HELP_GEOMETRY_MODULES_DIR ${GEOMETRY_MODULES_DIR}/base_geometry_obj)
 
 target_sources(${HELP_GEOMETRY_LIB}
     PUBLIC
         FILE_SET CXX_MODULES
         TYPE     CXX_MODULES
         FILES
-            ${GEOMETRY_MODULES_DIR}/point.cppm
-            ${GEOMETRY_MODULES_DIR}/line.cppm
-            ${GEOMETRY_MODULES_DIR}/plain.cppm
+            ${HELP_GEOMETRY_MODULES_DIR}/point.cppm
+            ${HELP_GEOMETRY_MODULES_DIR}/line.cppm
+            ${HELP_GEOMETRY_MODULES_DIR}/plain.cppm
 )
 
 target_include_directories(${HELP_GEOMETRY_LIB}
     PRIVATE
         ${GLOBAL_INCLUDE_DIR}
-        ${GEOMETRY_INCLUDE_DIR}
 )
 
 target_link_libraries(${HELP_GEOMETRY_LIB}
     PRIVATE
         ${MATH_LIB}
+        ${GLOBAL_GEOMETRY_LIB}
 )
 # NOT default cmake functions
-# this is my function, defined in 11 line of this `CMakeLists.txt` file
-# set some compile options for run_trinagles
+# this is my function, defined in 14 line of this `CMakeLists.txt` file
+# set some compile options for help_geomtery_lib
 target_debug_options(${HELP_GEOMETRY_LIB})
 
 # =============================================================================================================
 
-set(TRIANGLES_LIB triangles_lib)
-
+set(TRIANGLES_LIB _triangles)
 add_library(${TRIANGLES_LIB})
+
+set(TRIANGLE_MODULES_DIR ${GEOMETRY_MODULES_DIR}/triangle)
 
 target_sources(${TRIANGLES_LIB}
     PUBLIC
         FILE_SET CXX_MODULES
         TYPE     CXX_MODULES
-        FILES ${GEOMETRY_MODULES_DIR}/triangle.cppm
+        FILES ${TRIANGLE_MODULES_DIR}/triangle.cppm
 )
 
 target_include_directories(${TRIANGLES_LIB}
     PRIVATE
         ${GLOBAL_INCLUDE_DIR}
-        ${GEOMETRY_INCLUDE_DIR}
 )
 
 target_link_libraries(${TRIANGLES_LIB}
     PRIVATE
         ${MATH_LIB}
+        ${GLOBAL_GEOMETRY_LIB}
 
     PUBLIC
         ${HELP_GEOMETRY_LIB}
 )
 # NOT default cmake functions
-# this is my function, defined in 11 line of this `CMakeLists.txt` file
-# set some compile options for run_trinagles
+# this is my function, defined in 14 line of this `CMakeLists.txt` file
+# set some compile options for triangels_lib
 target_debug_options(${TRIANGLES_LIB})
 
 # =============================================================================================================
 
-set(OCTO_TREE_LIB octo_tree_lib)
+set(OCTREE_LIB _octree)
+add_library(${OCTREE_LIB})
 
-add_library(${OCTO_TREE_LIB})
+set(OCTREE_MODULES_DIR ${GEOMETRY_MODULES_DIR}/tree)
 
-target_sources(${OCTO_TREE_LIB}
+target_sources(${OCTREE_LIB}
     PUBLIC
         FILE_SET CXX_MODULES
         TYPE     CXX_MODULES
-        FILES ${GEOMETRY_MODULES_DIR}/octotree.cppm
+        FILES ${OCTREE_MODULES_DIR}/octree.cppm
 )
 
-target_include_directories(${OCTO_TREE_LIB}
+target_include_directories(${OCTREE_LIB}
     PRIVATE
         ${GLOBAL_INCLUDE_DIR}
-        ${GEOMETRY_INCLUDE_DIR}
 )
 
-target_link_libraries(${OCTO_TREE_LIB}
+target_link_libraries(${OCTREE_LIB}
     PRIVATE
         ${MATH_LIB}
+        ${GLOBAL_GEOMETRY_LIB}
 
     PUBLIC
         ${HELP_GEOMETRY_LIB}
         ${TRIANGLES_LIB}
 )
 # NOT default cmake functions
-# this is my function, defined in 11 line of this `CMakeLists.txt` file
-# set some compile options for run_trinagles
-target_debug_options(${OCTO_TREE_LIB})
+# this is my function, defined in 14 line of this `CMakeLists.txt` file
+# set some compile options for octree_lib
+target_debug_options(${OCTREE_LIB})
 
 # =============================================================================================================
 
-set(TEST_LIB test_lib)
+set(TEST_LIB _test)
 add_library(${TEST_LIB})
 
 set(TEST_LIB_SRC_DIR ${MODULES_DIR}/test)
@@ -235,10 +262,10 @@ set(TEST_LIB_SRC_DIR ${MODULES_DIR}/test)
 set(TEST_LIB_SRC
     ${TEST_LIB_SRC_DIR}/global/test_files.cppm
     ${TEST_LIB_SRC_DIR}/flag_parse/flag_parser.cppm
-    ${TEST_LIB_SRC_DIR}/flag_parse/input_stream.cppm
     ${TEST_LIB_SRC_DIR}/read_input/read_test_data.cppm
     ${TEST_LIB_SRC_DIR}/read_input/read_test_answer.cppm
     ${TEST_LIB_SRC_DIR}/read_input/get_test_data.cppm
+    ${TEST_LIB_SRC_DIR}/read_input/input_stream.cppm
     ${TEST_LIB_SRC_DIR}/parse_result/parse_test_result.cppm
     ${TEST_LIB_SRC_DIR}/execute_test/execute_test.cppm
 )
@@ -257,12 +284,12 @@ target_include_directories(${TEST_LIB}
 
 target_link_libraries(${TEST_LIB}
     PUBLIC
-        ${TRIANGLES_LIB}
+        ${OCTREE_LIB}
 )
 
 # NOT default cmake functions
-# this is my function, defined in 11 line of this `CMakeLists.txt` file
-# set some compile options for run_trinagles
+# this is my function, defined in 14 line of this `CMakeLists.txt` file
+# set some compile options for test_lib
 target_debug_options(${TEST_LIB})
 
 # =============================================================================================================
@@ -288,7 +315,7 @@ target_link_libraries(${TRIANGLES_EXE}
 )
 
 # NOT default cmake functions
-# this is my function, defined in 11 line of this `CMakeLists.txt` file
+# this is my function, defined in 14 line of this `CMakeLists.txt` file
 # set some compile options for run_trinagles
 target_debug_options(${TRIANGLES_EXE})
 
@@ -314,8 +341,8 @@ target_link_libraries(${DOUBLE_TRIANGLES_EXE}
 )
 
 # NOT default cmake functions
-# this is my function, defined in 11 line of this `CMakeLists.txt` file
-# set some compile options for run_trinagles
+# this is my function, defined in 14 line of this `CMakeLists.txt` file
+# set some compile options for run_double_trinagles
 target_debug_options(${DOUBLE_TRIANGLES_EXE})
 # =============================================================================================================
 
@@ -332,23 +359,12 @@ add_custom_target(${REBUILD_TARGET}
 
 # =============================================================================================================
 # TODO: compile logger as external project (ExternalProject_Add)
+
 # add logger if defined USE_LOGGER flag
-
-
-if(NOT TARGET spdlog)
-    # Stand-alone build
-    find_package(spdlog REQUIRED)
-endif()
-
-# ---------------------------------------------------------------------------------------
-# Example of using pre-compiled library
-# ---------------------------------------------------------------------------------------
-
-
 if (USE_LOGGER)
     message("-- Adding logger")
 
-    # костыль, но так надо чтобы не ждать логгера по полгода и без запары с exterbal project (я 2 раза пытался его настроить, оба проиграл)
+    # костыль, но так надо чтобы не ждать логгера по полгода и без запары с exterbal project (я 2 раза пытался его настроить, оба раза проиграл)
     set(MAIN_PROJECT_BUILD_TYPE ${CMAKE_BUILD_TYPE})
     set(CMAKE_BUILD_TYPE Release)
 
@@ -371,7 +387,7 @@ if (USE_LOGGER)
         ${DOUBLE_TRIANGLES_EXE}
         ${HELP_GEOMETRY_LIB}
         ${TRIANGLES_LIB}
-        ${OCTO_TREE_LIB}
+        ${OCTREE_LIB}
         ${TEST_LIB}
         ${MATH_LIB}
         ${ALL_UNIT_TESTS_TARGET}
@@ -379,14 +395,19 @@ if (USE_LOGGER)
 
     foreach(target_that_use_logger ${TARGETS_USING_LOGGER})
         add_logger(${target_that_use_logger})
-        target_link_libraries(${target_that_use_logger}
-         PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
     endforeach()
 
     set(CMAKE_BUILD_TYPE ${MAIN_PROJECT_BUILD_TYPE})
 
 endif()
 
+# =============================================================================================================
+
+if (TREE_GRAPHIC_DUMP)
+    
+endif()
+# =============================================================================================================
+# =============================================================================================================
 # =============================================================================================================
 
 # TESTS (unit and e2e)
@@ -422,7 +443,6 @@ function(target_unit_test unit_test_target_name unit_test_src modules_library)
 
     target_include_directories(${unit_test_target_name}
         PRIVATE
-            ${GEOMETRY_INCLUDE_DIR}
             ${GLOBAL_INCLUDE_DIR}
     )
 
@@ -438,7 +458,7 @@ endfunction(target_unit_test)
 # =============================================================================================================
 
 # set name of target to build all unit-tests
-set(BUILD_ALL_UNIT_TESTS_TARGET build_test)
+set(BUILD_ALL_UNIT_TESTS_TARGET build_tests)
 
 # set dir with unit-tests
 set(UNIT_TEST_DIR ${PROJECT_SOURCE_DIR}/../tests/unit-tests)
@@ -559,12 +579,25 @@ target_unit_test(
 )
 
 # =============================================================================================================
+# create octree unit test
+
+set(OCTREE_UNIT_TEST_EXE octree_unit_test                              )
+set(OCTREE_UNIT_TEST_SRC ${UNIT_TEST_DIR}/geometry/unit_test_octree.cpp)
+
+target_unit_test(
+    "${OCTREE_UNIT_TEST_EXE}"
+    "${OCTREE_UNIT_TEST_SRC}"
+    "${OCTREE_LIB}"
+)
+
+# =============================================================================================================
 
 set(GEOMETRY_UNIT_TESTS
     ${POINT_UNIT_TEST_EXE}
     ${LINE_UNIT_TEST_EXE}
     ${PLAIN_UNIT_TEST_EXE}
     ${TRIANGLES_UNIT_TEST_EXE}
+    ${OCTREE_UNIT_TEST_EXE}
 )
 
 set(GEOMETRY_UNIT_TESTS_TARGET geometry_unit_tests)

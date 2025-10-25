@@ -8,16 +8,14 @@ module;
 #include <array>
 
 #include "global.hpp"
-#include "constants.hpp"
-#include "relative_positions.hpp"
 
 import line;
 import plain;
+import constants;
+import relative_positions;
 
 #if defined(USE_LOGGER)
 import logger;
-#include <sstream>
-#include <string>
 #endif // defined(USE_LOGGER)
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -43,7 +41,7 @@ template <typename coordinate_t>
 class triangle_t
 {
     static_assert(std::is_floating_point_v<coordinate_t>,
-                "In triangle_t as template type excpect only floating point type.");
+                  "In triangle_t as template type excpect only floating point type.");
 
     // is it cringe??
     using point_t   = point_t  <coordinate_t>;
@@ -52,7 +50,8 @@ class triangle_t
     using side_t    = segment_t<coordinate_t>;
     using segment_t = segment_t<coordinate_t>;
 
-    static_assert(std::is_same_v<segment_t, side_t>, "this types must be equal");
+    static_assert(std::is_same_v<segment_t, side_t>,
+                  "this types must be equal");
 
     private:
         point_t a_vertex_;
@@ -80,6 +79,13 @@ class triangle_t
 
         plain_t             get_triangle_plain                                     ()                                                    const;
 
+        bool                is_point                                               ()                                                    const;
+        bool                is_line                                                (line_t& line)                                        const;
+
+        bool                intersect_if_degenerate_triangles                      (const triangle_t& triangle, bool& intersect_result)  const;
+
+        bool                is_point_in_triangle                                   (const point_t& point)                                const;
+
     public:
         triangle_t                                     () = default;
         triangle_t                                     (const point_t& a,
@@ -90,22 +96,24 @@ class triangle_t
                                                         triangle_vertices_quant * dimension_of_space>
                                                         array_of_coordinates);
 
-        coordinate_t get_a_x                           ()                           const;
-        coordinate_t get_a_y                           ()                           const;
-        coordinate_t get_a_z                           ()                           const;
-        coordinate_t get_b_x                           ()                           const;
-        coordinate_t get_b_y                           ()                           const;
-        coordinate_t get_b_z                           ()                           const;
-        coordinate_t get_c_x                           ()                           const;
-        coordinate_t get_c_y                           ()                           const;
-        coordinate_t get_c_z                           ()                           const;
+        coordinate_t get_a_x                           ()                               const;
+        coordinate_t get_a_y                           ()                               const;
+        coordinate_t get_a_z                           ()                               const;
+        coordinate_t get_b_x                           ()                               const;
+        coordinate_t get_b_y                           ()                               const;
+        coordinate_t get_b_z                           ()                               const;
+        coordinate_t get_c_x                           ()                               const;
+        coordinate_t get_c_y                           ()                               const;
+        coordinate_t get_c_z                           ()                               const;
 
-        bool         is_valid                          ()                           const;
+        bool         is_valid                          ()                               const;
 
-        bool         is_intersect_with_another_triangle(const triangle_t& triangle) const;
+        bool         is_intersect_with_another_triangle(const triangle_t& triangle,
+                                                        bool parse_degenerate_triangles
+                                                             = false)                   const;
 
         ON_LOGGER(
-        std::string  get_dump                          (std::string_view name)      const;
+        std::string  get_dump                          (std::string_view name)          const;
         )
 };
 
@@ -139,19 +147,19 @@ bool
 triangle_t<coordinate_t>::is_valid() const
 {
     if (!(
-        a_vertex_.get_x_coordinate().is_valid() &&
-        a_vertex_.get_y_coordinate().is_valid() &&
-        a_vertex_.get_z_coordinate().is_valid() &&
-        b_vertex_.get_x_coordinate().is_valid() &&
-        b_vertex_.get_y_coordinate().is_valid() &&
-        b_vertex_.get_z_coordinate().is_valid() &&
-        c_vertex_.get_x_coordinate().is_valid() &&
-        c_vertex_.get_y_coordinate().is_valid() &&
-        c_vertex_.get_z_coordinate().is_valid()
+        a_vertex_.get_x().is_valid() &&
+        a_vertex_.get_y().is_valid() &&
+        a_vertex_.get_z().is_valid() &&
+        b_vertex_.get_x().is_valid() &&
+        b_vertex_.get_y().is_valid() &&
+        b_vertex_.get_z().is_valid() &&
+        c_vertex_.get_x().is_valid() &&
+        c_vertex_.get_y().is_valid() &&
+        c_vertex_.get_z().is_valid()
     )) return false;
 
     return
-        !(a_vertex_.is_on_1_line_with_2_points(b_vertex_, c_vertex_));
+        !(a_vertex_.is_collenear(b_vertex_, c_vertex_));
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -160,7 +168,7 @@ template <typename coordinate_t>
 coordinate_t
 triangle_t<coordinate_t>::get_a_x() const
 {
-    return a_vertex_.get_x_coordinate();
+    return a_vertex_.get_x();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -169,7 +177,7 @@ template <typename coordinate_t>
 coordinate_t
 triangle_t<coordinate_t>::get_a_y() const
 {
-    return a_vertex_.get_y_coordinate();
+    return a_vertex_.get_y();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -178,7 +186,7 @@ template <typename coordinate_t>
 coordinate_t
 triangle_t<coordinate_t>::get_a_z() const
 {
-    return a_vertex_.get_z_coordinate();
+    return a_vertex_.get_z();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -187,7 +195,7 @@ template <typename coordinate_t>
 coordinate_t
 triangle_t<coordinate_t>::get_b_x() const
 {
-    return b_vertex_.get_x_coordinate();
+    return b_vertex_.get_x();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -196,7 +204,7 @@ template <typename coordinate_t>
 coordinate_t
 triangle_t<coordinate_t>::get_b_y() const
 {
-    return b_vertex_.get_y_coordinate();
+    return b_vertex_.get_y();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -205,7 +213,7 @@ template <typename coordinate_t>
 coordinate_t
 triangle_t<coordinate_t>::get_b_z() const
 {
-    return b_vertex_.get_z_coordinate();
+    return b_vertex_.get_z();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -214,7 +222,7 @@ template <typename coordinate_t>
 coordinate_t
 triangle_t<coordinate_t>::get_c_x() const
 {
-    return c_vertex_.get_x_coordinate();
+    return c_vertex_.get_x();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -223,7 +231,7 @@ template <typename coordinate_t>
 coordinate_t
 triangle_t<coordinate_t>::get_c_y() const
 {
-    return c_vertex_.get_y_coordinate();
+    return c_vertex_.get_y();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -232,21 +240,24 @@ template <typename coordinate_t>
 coordinate_t
 triangle_t<coordinate_t>::get_c_z() const
 {
-    return c_vertex_.get_z_coordinate();
+    return c_vertex_.get_z();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
 
 template <typename coordinate_t>
 bool
-triangle_t<coordinate_t>::is_intersect_with_another_triangle(const triangle_t<coordinate_t>& triangle) const
+triangle_t<coordinate_t>::is_intersect_with_another_triangle(const triangle_t<coordinate_t>& triangle, bool parse_degenerate_triangles) const
 {
+    if (parse_degenerate_triangles)
+    {
+        bool intersect_triangles_result = false;
+        if (intersect_if_degenerate_triangles(triangle, intersect_triangles_result))
+            return intersect_triangles_result;
+    }
+
     const plain_t    this_triangle_plain =          get_triangle_plain();
     const plain_t another_triangle_plain = triangle.get_triangle_plain();
-
-    glog.logc(LogColor::Yellow, "finding intersection of trianlges:");
-    glog.logc(LogColor::Red, get_dump("1"));
-    glog.logc(LogColor::Green, triangle.get_dump("2"));
 
     if (this_triangle_plain.compare_with_another_plain(another_triangle_plain))
         return is_intersect_with_another_triangle_on_same_plain(triangle);
@@ -269,7 +280,6 @@ triangle_t<coordinate_t>::is_intersect_with_another_triangle_on_same_plain(const
     side_t this_triangle_sides    [triangle_sides_quant];
     side_t another_triangle_sides [triangle_sides_quant];
 
-
     for (size_t i = 0; i < triangle_sides_quant; i++)
     {
            this_triangle_sides[i] =          get_i_side(i);
@@ -291,8 +301,6 @@ triangle_t<coordinate_t>::is_intersect_with_another_triangle_on_same_plain(const
         }
     }
 
-
-
     return false;
 }
 
@@ -304,15 +312,10 @@ triangle_t<coordinate_t>::is_intersect_with_another_triangle_on_different_plains
                                                                                  const    plain_t& this_triangle_plain,
                                                                                  const plain_t& another_triangle_plain) const
 {
+    msg_assert(!this_triangle_plain.compare_with_another_plain(another_triangle_plain), "in this functions we are parsing situation with not-equal plains");
+
     line_t              intersection_line;
     relative_position_t relative_position_of_triangles_plains = this_triangle_plain.get_intersection_with_another_plain(another_triangle_plain, intersection_line);
-
-    static Logger l("triangle-intersection-diff-plains", "/home/ananasik/Pictures/mmm/dsenria/dsenria_best.jpg");
-
-    l.logc(LogColor::Red, get_dump("this"));
-    l.logc(LogColor::Green, triangle.get_dump("another"));
-
-    msg_assert(!this_triangle_plain.compare_with_another_plain(another_triangle_plain), "in this functions we are parsing situation with not-equal plains");
 
     if (relative_position_of_triangles_plains == relative_position_t::NO_INTERSECTION)
         return false; // plains are parallel
@@ -449,6 +452,88 @@ triangle_t<coordinate_t>::get_triangle_plain() const
                    b_vertex_,
                    c_vertex_);
 }
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+template <typename coordinate_t>
+bool
+triangle_t<coordinate_t>::is_point() const
+{
+    return
+        a_vertex_.compare_with_another_point(b_vertex_) &&
+        a_vertex_.compare_with_another_point(c_vertex_);
+}
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+template <typename coordinate_t>
+bool
+triangle_t<coordinate_t>::is_line(line_t& line) const
+{
+    const bool is_ab_line = (!a_vertex_.compare_with_another_point(b_vertex_)           ) &&
+                      ( c_vertex_.is_collenear              (a_vertex_, b_vertex_));
+                    
+    if (is_ab_line)
+    {
+        line = line_t(a_vertex_, b_vertex_);
+        return true;
+    }
+
+    const bool is_ac_line = (!a_vertex_.compare_with_another_point(c_vertex_)          )  &&
+                            ( b_vertex_.is_collenear              (a_vertex_, c_vertex_));
+    if (is_ac_line)
+    {
+        line = line_t(a_vertex_, c_vertex_);
+        return true;
+    }
+
+    line.made_invalid();
+    return false;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+template <typename coordinate_t>
+bool
+triangle_t<coordinate_t>::intersect_if_degenerate_triangles(const triangle_t& triangle, bool& intersect_result) const
+{
+    const bool is_this_point    =          is_point();
+    const bool is_another_point = triangle.is_point();
+
+    if (is_this_point && is_another_point)
+    {
+        intersect_result = a_vertex_.compare_with_another_point(triangle.a_vertex_);
+        return true;
+    }
+
+    line_t another_line;
+    const bool is_another_line = triangle.is_line(another_line);
+
+    if (is_this_point && is_another_line)
+    {
+        intersect_result = another_line.is_point_on_line(a_vertex_);
+        return true;
+    }
+
+    line_t this_line;
+    const bool is_this_line = is_line(this_line);
+
+    if (is_this_line && is_another_point)
+    {
+        intersect_result = this_line.is_point_on_line(triangle.a_vertex_);
+        return true;
+    }
+
+    if (is_this_line && is_another_line)
+    {
+        intersect_result = (this_line.get_intersection_type_with_another_line(another_line) !=
+                            relative_position_t::NO_INTERSECTION);
+        return true;
+    }
+
+    return false;
+} 
+
 
 // DUMP
 //----------------------------------------------------------------------------------------------------------------------------

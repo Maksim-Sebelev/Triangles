@@ -8,16 +8,20 @@ module;
 
 #include "global.hpp"
 #include "custom_console_output.hpp"
-#include "constants.hpp"
+
+import constants;
 
 import compare;
 
 #if defined(USE_LOGGER)
 import logger;
-
-#include <string>
-#include <sstream>
 #endif /*define(USE_LOGGER)*/
+
+#if defined(TREE_GRAPHIC_DUMP)
+#define ON_GRAPHIC_DUMP(...) __VA_ARGS__
+#else /* defined(TREE_GRAPHIC_DUMP) */
+#define ON_GRAPHIC_DUMP(...)
+#endif /* defined(TREE_GRAPHIC_DUMP) */
 
 //----------------------------------------------------------------------------------------------------------------------------
 
@@ -54,14 +58,14 @@ class point_t
         point_t(coordinate_t x, coordinate_t y, coordinate_t z);
         point_t(const std::array<coordinate_t, dimension_of_space>& array_of_coordinates);
 
-        coordinate_t get_x_coordinate          ()                                     const;
-        coordinate_t get_y_coordinate          ()                                     const;
-        coordinate_t get_z_coordinate          ()                                     const;
+        coordinate_t get_x          ()                                     const;
+        coordinate_t get_y          ()                                     const;
+        coordinate_t get_z          ()                                     const;
 
         bool         is_valid                  ()                                     const;
     
         bool         compare_with_another_point(const point_t& compare_point)         const;
-        bool         is_on_1_line_with_2_points(const point_t& p1, const point_t& p2) const;
+        bool         is_collenear(const point_t& p1, const point_t& p2) const;
         bool         is_between_2_points       (const point_t& p1, const point_t& p2) const;
         
         void         set_x                     (const coordinate_t& value);
@@ -72,6 +76,9 @@ class point_t
 
         ON_LOGGER(
         std::string get_dump                   (std::string_view name)                const;
+        )
+        ON_GRAPHIC_DUMP(
+        void        get_graphic_dump           ()                                     const;
         )
 };
 
@@ -97,7 +104,7 @@ z_coordinate_(array_of_coordinates[2])
 
 template <typename coordinate_t>
 coordinate_t
-point_t<coordinate_t>::get_x_coordinate() const
+point_t<coordinate_t>::get_x() const
 {
     return x_coordinate_;
 }
@@ -106,7 +113,7 @@ point_t<coordinate_t>::get_x_coordinate() const
 
 template <typename coordinate_t>
 coordinate_t
-point_t<coordinate_t>::get_y_coordinate() const
+point_t<coordinate_t>::get_y() const
 {
     return y_coordinate_;
 }
@@ -115,7 +122,7 @@ point_t<coordinate_t>::get_y_coordinate() const
 
 template <typename coordinate_t>
 coordinate_t
-point_t<coordinate_t>::get_z_coordinate() const
+point_t<coordinate_t>::get_z() const
 {
     return z_coordinate_;
 }
@@ -159,26 +166,26 @@ point_t<coordinate_t>::is_valid() const
 
 template <typename coordinate_t>
 bool
-point_t<coordinate_t>::is_on_1_line_with_2_points(const point_t& p1, const point_t& p2) const
+point_t<coordinate_t>::is_collenear(const point_t& p1, const point_t& p2) const
 {
-    coordinate_t x_21_diff = p1.get_x_coordinate() - get_x_coordinate();
-    coordinate_t x_31_diff = p2.get_x_coordinate() - get_x_coordinate();
+    coordinate_t x_21_diff = p1.get_x() - get_x();
+    coordinate_t x_31_diff = p2.get_x() - get_x();
 
-    coordinate_t y_21_diff = p1.get_y_coordinate() - get_y_coordinate();
-    coordinate_t y_31_diff = p2.get_y_coordinate() - get_y_coordinate();
+    coordinate_t y_21_diff = p1.get_y() - get_y();
+    coordinate_t y_31_diff = p2.get_y() - get_y();
 
-    if (!compare<coordinate_t>(x_21_diff * y_31_diff, 
+    if (!Math::Compare::compare<coordinate_t>(x_21_diff * y_31_diff, 
                                y_21_diff * x_31_diff
     )) return false;
 
-    coordinate_t z_21_diff = p1.get_z_coordinate() - get_z_coordinate();
-    coordinate_t z_31_diff = p2.get_z_coordinate() - get_z_coordinate();
+    coordinate_t z_21_diff = p1.get_z() - get_z();
+    coordinate_t z_31_diff = p2.get_z() - get_z();
 
-    if (!compare<coordinate_t>(x_21_diff * z_31_diff, 
+    if (!Math::Compare::compare<coordinate_t>(x_21_diff * z_31_diff, 
                                z_21_diff * x_31_diff
     )) return false;
 
-    return compare<coordinate_t>(y_21_diff * z_31_diff, 
+    return Math::Compare::compare<coordinate_t>(y_21_diff * z_31_diff, 
                                  z_21_diff * y_31_diff);
 }
 
@@ -284,4 +291,12 @@ point_t<coordinate_t>::get_dump(std::string_view name) const
 } /* namespace Geometry */
 } /* namespace Detail */
 
+// TREE_GRAPHIC_DUMP
 //----------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------
+
+ON_GRAPHIC_DUMP(
+
+
+)

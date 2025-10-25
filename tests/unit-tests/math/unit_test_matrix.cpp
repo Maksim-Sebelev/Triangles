@@ -2,6 +2,8 @@
 
 import matrix;
 
+using namespace Math::LinearAlgebra;
+
 using f_vector_2 = vector_2_t<float>; 
 using d_vector_2 = vector_2_t<double>; 
 
@@ -29,19 +31,18 @@ TEST(MathMatrixtesting, Float_ByColumnCtor)
 
 TEST(MathMatrixtesting, Double_ByAllElementsCtor)
 {
-    d_matrix_2x2 m1(1.0f, 2.0f, 3.0f, 4.0f);
+    d_matrix_2x2 m1(1.0, 2.0, 3.0, 4.0);
     // f_matrix_2x2 m2(0.5f, );
-    EXPECT_FLOAT_EQ(m1.get_determinate(), -2.0f);
-    
+    EXPECT_DOUBLE_EQ(m1.get_determinate(), -2.0);
     
 }
 
 TEST(MathMatrixtesting, Double_ByColumnCtor)
 {
-    d_vector_2 c1(1.0f, 2.0f);
-    d_vector_2 c2(3.0f, 4.0f);
+    d_vector_2 c1(1.0, 2.0);
+    d_vector_2 c2(3.0, 4.0);
 
     d_matrix_2x2 m(c1, c2);
 
-    EXPECT_FLOAT_EQ(m.get_determinate(), -2.0f);
+    EXPECT_FLOAT_EQ(m.get_determinate(), -2.0);
 }

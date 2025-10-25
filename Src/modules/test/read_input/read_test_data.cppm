@@ -38,9 +38,9 @@ template <typename coordinate_t>
 class test_input_t
 {
     public:
-        size_t                                          get_triangles_quantity()         const;
-        Geometry::triangle_t<coordinate_t>              get_i_triangle        (size_t i) const;
-        std::vector<Geometry::triangle_t<coordinate_t>> get_triangles         ()         const;
+        size_t                                                 get_triangles_quantity()         const;
+        Geometry::triangle_t<coordinate_t>                     get_i_triangle        (size_t i) const;
+        const std::vector<Geometry::triangle_t<coordinate_t>>& get_triangles         ()         const;
 
         test_input_t();                           // ctor for reading from stdin
         test_input_t(std::string_view test_file); // ctor for reading from .dat file
@@ -151,6 +151,15 @@ test_input_t<coordinate_t>::get_i_triangle(size_t i) const
         index_out_of_range(i);
 
     return triangles_[i];
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+template <typename coordinate_t>
+const std::vector<Geometry::triangle_t<coordinate_t>>&
+test_input_t<coordinate_t>::get_triangles() const
+{
+    return triangles_;
 }
 
 // reading from stdin

@@ -4,19 +4,15 @@ module;
 
 #include <cmath>
 
-//----------------------------------------------------------------------------------------------------------------------------
-
 #include "global.hpp"
-#include "constants.hpp"
-#include "relative_positions.hpp"
+
+import constants;
 
 import compare;
 import linear_systems;
 
 #if defined(USE_LOGGER)
 import logger;
-#include <sstream>
-#include <string>
 #endif // defined(USE_LOGGER)
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -26,6 +22,7 @@ export module line;
 //----------------------------------------------------------------------------------------------------------------------------
 
 export import point;
+export import relative_positions;
 
 //----------------------------------------------------------------------------------------------------------------------------
 
@@ -70,16 +67,18 @@ class line_t
         line_t(const point_t& p1, const point_t& p2);
         line_t(const segment_t& segment);
 
-        bool                is_valid                          ()                                                           const;
+        bool                is_valid                               ()                                                           const;
 
-        point_t             get_first_ref_point               ()                                                           const;
-        point_t             get_second_ref_point              ()                                                           const;
+        point_t             get_first_ref_point                    ()                                                           const;
+        point_t             get_second_ref_point                   ()                                                           const;
 
-        bool                compare_with_another_line         (const line_t& compare_line)                                 const;
-        bool                is_point_on_line                  (const point_t& point)                                       const;
+        bool                compare_with_another_line              (const line_t& compare_line)                                 const;
+        bool                is_point_on_line                       (const point_t& point)                                       const;
 
-        relative_position_t get_intersection_with_another_line(const line_t   & another_line, point_t& intersection_point) const;
-        relative_position_t get_intersection_with_segment     (const segment_t& segment     , point_t& intersection_point) const;
+        relative_position_t get_intersection_with_another_line     (const line_t   & another_line, point_t& intersection_point) const;
+        relative_position_t get_intersection_type_with_another_line(const line_t   & another_line)                              const;
+    
+        relative_position_t get_intersection_with_segment          (const segment_t& segment     , point_t& intersection_point) const;
 
         void                made_invalid                      ();
 
@@ -144,15 +143,15 @@ template <typename coordinate_t>
 bool
 line_t<coordinate_t>::compare_with_another_line(const line_t& line) const
 {
-    const coordinate_t a11 =      ref_point_2_.get_x_coordinate() -      ref_point_1_.get_x_coordinate();
-    const coordinate_t a12 = line.ref_point_1_.get_x_coordinate() - line.ref_point_2_.get_x_coordinate();
+    const coordinate_t a11 =      ref_point_2_.get_x() -      ref_point_1_.get_x();
+    const coordinate_t a12 = line.ref_point_1_.get_x() - line.ref_point_2_.get_x();
 
-    const coordinate_t b1  = line.ref_point_1_.get_x_coordinate() -      ref_point_1_.get_x_coordinate();
+    const coordinate_t b1  = line.ref_point_1_.get_x() -      ref_point_1_.get_x();
 
-    const coordinate_t a21 =      ref_point_2_.get_y_coordinate() -      ref_point_1_.get_y_coordinate();
-    const coordinate_t a22 = line.ref_point_1_.get_y_coordinate() - line.ref_point_2_.get_y_coordinate();
+    const coordinate_t a21 =      ref_point_2_.get_y() -      ref_point_1_.get_y();
+    const coordinate_t a22 = line.ref_point_1_.get_y() - line.ref_point_2_.get_y();
 
-    const coordinate_t b2  = line.ref_point_1_.get_y_coordinate() -      ref_point_1_.get_y_coordinate();
+    const coordinate_t b2  = line.ref_point_1_.get_y() -      ref_point_1_.get_y();
 
     const matrix_2x2_t        A(a11, a12, a21, a22);
     const vector_2_t          b(b1, b2);
@@ -163,10 +162,10 @@ line_t<coordinate_t>::compare_with_another_line(const line_t& line) const
     if (solution_type != square_linear_system_solution_t::INF_SOLUTIONS)
         return false;
 
-    const coordinate_t a31 =        ref_point_2_.get_z_coordinate() -      ref_point_1_.get_z_coordinate();
-    const coordinate_t a32 = line.ref_point_1_.get_z_coordinate() - line  .ref_point_2_.get_z_coordinate();
+    const coordinate_t a31 =        ref_point_2_.get_z() -      ref_point_1_.get_z();
+    const coordinate_t a32 = line.ref_point_1_.get_z() - line  .ref_point_2_.get_z();
     
-    const coordinate_t b3  = line.ref_point_1_.get_z_coordinate() -      ref_point_1_.get_z_coordinate();
+    const coordinate_t b3  = line.ref_point_1_.get_z() -      ref_point_1_.get_z();
     
     const matrix_2x2_t        A_2(a11, a12, a31, a32);
     const vector_2_t          b_2(b1, b3);
@@ -186,15 +185,15 @@ template <typename coordinate_t>
 relative_position_t
 line_t<coordinate_t>::get_intersection_with_another_line(const line_t& line, point_t& intersection_point) const
 {
-    const coordinate_t a11 =      ref_point_2_.get_x_coordinate() -      ref_point_1_.get_x_coordinate();
-    const coordinate_t a12 = line.ref_point_1_.get_x_coordinate() - line.ref_point_2_.get_x_coordinate();
+    const coordinate_t a11 =      ref_point_2_.get_x() -      ref_point_1_.get_x();
+    const coordinate_t a12 = line.ref_point_1_.get_x() - line.ref_point_2_.get_x();
 
-    const coordinate_t b1  = line.ref_point_1_.get_x_coordinate() -      ref_point_1_.get_x_coordinate();
+    const coordinate_t b1  = line.ref_point_1_.get_x() -      ref_point_1_.get_x();
 
-    const coordinate_t a21 =      ref_point_2_.get_y_coordinate() -      ref_point_1_.get_y_coordinate();
-    const coordinate_t a22 = line.ref_point_1_.get_y_coordinate() - line.ref_point_2_.get_y_coordinate();
+    const coordinate_t a21 =      ref_point_2_.get_y() -      ref_point_1_.get_y();
+    const coordinate_t a22 = line.ref_point_1_.get_y() - line.ref_point_2_.get_y();
 
-    const coordinate_t b2  = line.ref_point_1_.get_y_coordinate() -      ref_point_1_.get_y_coordinate();
+    const coordinate_t b2  = line.ref_point_1_.get_y() -      ref_point_1_.get_y();
 
     const matrix_2x2_t        A(a11, a12, a21, a22);
     const vector_2_t          b(b1, b2);
@@ -211,10 +210,10 @@ line_t<coordinate_t>::get_intersection_with_another_line(const line_t& line, poi
 
         case square_linear_system_solution_t::INF_SOLUTIONS:
         {
-            const coordinate_t a31 =      ref_point_2_.get_z_coordinate() -      ref_point_1_.get_z_coordinate();
-            const coordinate_t a32 = line.ref_point_1_.get_z_coordinate() - line.ref_point_2_.get_z_coordinate();
+            const coordinate_t a31 =      ref_point_2_.get_z() -      ref_point_1_.get_z();
+            const coordinate_t a32 = line.ref_point_1_.get_z() - line.ref_point_2_.get_z();
             
-            const coordinate_t b3  = line.ref_point_1_.get_z_coordinate() -      ref_point_1_.get_z_coordinate();
+            const coordinate_t b3  = line.ref_point_1_.get_z() -      ref_point_1_.get_z();
             
             const matrix_2x2_t        A_2(a11, a12, a31, a32);
             const vector_2_t          b_2(b1, b3);
@@ -233,10 +232,8 @@ line_t<coordinate_t>::get_intersection_with_another_line(const line_t& line, poi
                     return relative_position_t::CONTAIN_OR_EQUAL;
 
                 case square_linear_system_solution_t::ONE_SOLUTION:
-                {
                     set_intersection_point(intersection_point, solution);
                     return relative_position_t::NORMAL_INTERSECTION;
-                }
 
                 default: builtin_unreachable_wrapper("undefined solution type. maybe you forgot to add new value of square_linear_system_solution_t");
             }
@@ -249,10 +246,10 @@ line_t<coordinate_t>::get_intersection_with_another_line(const line_t& line, poi
         default: builtin_unreachable_wrapper("undefined solution type. maybe you forgot to add new value of square_linear_system_solution_t");
     }
 
-    const coordinate_t a31 =      ref_point_2_.get_z_coordinate() -      ref_point_1_.get_z_coordinate();
-    const coordinate_t a32 = line.ref_point_1_.get_z_coordinate() - line.ref_point_2_.get_z_coordinate();
+    const coordinate_t a31 =      ref_point_2_.get_z() -      ref_point_1_.get_z();
+    const coordinate_t a32 = line.ref_point_1_.get_z() - line.ref_point_2_.get_z();
             
-    const coordinate_t b3  = line.ref_point_1_.get_z_coordinate() -      ref_point_1_.get_z_coordinate();
+    const coordinate_t b3  = line.ref_point_1_.get_z() -      ref_point_1_.get_z();
 
     vector_2_t third_equation(a31, a32);
 
@@ -264,6 +261,86 @@ line_t<coordinate_t>::get_intersection_with_another_line(const line_t& line, poi
     }
 
     set_intersection_point(intersection_point, solution);
+
+    return relative_position_t::NORMAL_INTERSECTION;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+
+template <typename coordinate_t>
+relative_position_t
+line_t<coordinate_t>::get_intersection_type_with_another_line(const line_t& line) const
+{
+    const coordinate_t a11 =      ref_point_2_.get_x() -      ref_point_1_.get_x();
+    const coordinate_t a12 = line.ref_point_1_.get_x() - line.ref_point_2_.get_x();
+
+    const coordinate_t b1  = line.ref_point_1_.get_x() -      ref_point_1_.get_x();
+
+    const coordinate_t a21 =      ref_point_2_.get_y() -      ref_point_1_.get_y();
+    const coordinate_t a22 = line.ref_point_1_.get_y() - line.ref_point_2_.get_y();
+
+    const coordinate_t b2  = line.ref_point_1_.get_y() -      ref_point_1_.get_y();
+
+    const matrix_2x2_t        A(a11, a12, a21, a22);
+    const vector_2_t          b(b1, b2);
+    const linear_system_2x2_t linear_system(A, b);
+
+    vector_2_t                        solution;
+    square_linear_system_solution_t   solution_type = linear_system.get_solution(solution);
+
+    switch (solution_type)
+    {
+        case square_linear_system_solution_t::NO_SOLUTIONS:
+            return relative_position_t::NO_INTERSECTION;
+
+        case square_linear_system_solution_t::INF_SOLUTIONS:
+        {
+            const coordinate_t a31 =      ref_point_2_.get_z() -      ref_point_1_.get_z();
+            const coordinate_t a32 = line.ref_point_1_.get_z() - line.ref_point_2_.get_z();
+            
+            const coordinate_t b3  = line.ref_point_1_.get_z() -      ref_point_1_.get_z();
+            
+            const matrix_2x2_t        A_2(a11, a12, a31, a32);
+            const vector_2_t          b_2(b1, b3);
+            const linear_system_2x2_t linear_system2(A_2, b_2);
+
+            solution_type = linear_system2.get_solution(solution);
+
+            switch (solution_type)
+            {
+                case square_linear_system_solution_t::NO_SOLUTIONS:
+                    return relative_position_t::NO_INTERSECTION;
+                
+                case square_linear_system_solution_t::INF_SOLUTIONS:
+                    return relative_position_t::CONTAIN_OR_EQUAL;
+
+                case square_linear_system_solution_t::ONE_SOLUTION:
+                    return relative_position_t::NORMAL_INTERSECTION;
+
+                default: builtin_unreachable_wrapper("undefined solution type. maybe you forgot to add new value of square_linear_system_solution_t");
+            }
+
+            builtin_unreachable_wrapper("we must return in switch");
+        }
+        case square_linear_system_solution_t::ONE_SOLUTION:
+            break;
+
+        default: builtin_unreachable_wrapper("undefined solution type. maybe you forgot to add new value of square_linear_system_solution_t");
+    }
+
+    const coordinate_t a31 =      ref_point_2_.get_z() -      ref_point_1_.get_z();
+    const coordinate_t a32 = line.ref_point_1_.get_z() - line.ref_point_2_.get_z();
+            
+    const coordinate_t b3  = line.ref_point_1_.get_z() -      ref_point_1_.get_z();
+
+    vector_2_t third_equation(a31, a32);
+
+    if (!Math::Compare::compare<coordinate_t>
+        (third_equation.get_mul_by_another_vector(solution), b3, static_cast<coordinate_t>(1e-3)))
+    {
+        return relative_position_t::NO_INTERSECTION;
+    }
 
     return relative_position_t::NORMAL_INTERSECTION;
 }
@@ -303,16 +380,16 @@ line_t<coordinate_t>::set_intersection_point(point_t& intersection_point, const 
 {
     coordinate_t solution_a1 = solution.get_a1();
 
-    const coordinate_t solution_x = ref_point_1_.get_x_coordinate() +
-                                    (ref_point_2_.get_x_coordinate() - ref_point_1_.get_x_coordinate()) *
+    const coordinate_t solution_x = ref_point_1_.get_x() +
+                                    (ref_point_2_.get_x() - ref_point_1_.get_x()) *
                                      solution_a1;
 
-    const coordinate_t solution_y = ref_point_1_.get_y_coordinate() +
-                                   (ref_point_2_.get_y_coordinate() - ref_point_1_.get_y_coordinate()) *
+    const coordinate_t solution_y = ref_point_1_.get_y() +
+                                   (ref_point_2_.get_y() - ref_point_1_.get_y()) *
                                      solution_a1;
     
-    const coordinate_t solution_z = ref_point_1_.get_z_coordinate() +
-                                   (ref_point_2_.get_z_coordinate() - ref_point_1_.get_z_coordinate()) *
+    const coordinate_t solution_z = ref_point_1_.get_z() +
+                                   (ref_point_2_.get_z() - ref_point_1_.get_z()) *
                                      solution_a1;
 
     intersection_point.set_x(solution_x);
@@ -326,7 +403,7 @@ template <typename coordinate_t>
 bool
 line_t<coordinate_t>::is_point_on_line(const point_t& point) const
 {
-    return point.is_on_1_line_with_2_points(ref_point_1_, ref_point_2_);
+    return point.is_collenear(ref_point_1_, ref_point_2_);
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -473,7 +550,7 @@ bool
 segment_t<coordinate_t>::is_point_on_segment(const point_t& point) const
 {
     return
-        point.is_on_1_line_with_2_points(begin_point_, end_point_) &&
+        point.is_collenear(begin_point_, end_point_) &&
         point.is_between_2_points       (begin_point_, end_point_);
 }
  

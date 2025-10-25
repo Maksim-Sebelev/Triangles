@@ -25,12 +25,15 @@ export module parse_test_result;
 //---------------------------------------------------------------------------------------------------------------
 
 template <typename coordinate_t>
-void print_good_triangles            (const RunProgram::program_result_t<coordinate_t>& program_out,                bool verbose_output);
-void bad_good_triangles_quant_message(size_t program_good_triangles_quant, size_t correct_good_traignles_quant,     bool verbose_output);
-void bad_i_good_triangle_message     (size_t i, size_t program_i_triangle_number, size_t correct_i_triangle_number, bool verbose_output);
-void tets_passed_message             (                                                                              bool verbose_output);
-void test_failed_message             (                                                                              bool verbose_output);
-void no_input_message                (                                                                              bool verbose_output);
+void print_good_triangles                               (const RunProgram::program_result_t<coordinate_t>& program_out,                bool verbose_output);
+void bad_good_triangles_quant_message                   (size_t program_good_triangles_quant, size_t correct_good_traignles_quant,     bool verbose_output);
+void bad_i_good_triangle_message                        (size_t i, size_t program_i_triangle_number, size_t correct_i_triangle_number, bool verbose_output);
+void tets_passed_message                                (                                                                              bool verbose_output);
+void test_failed_message                                (                                                                              bool verbose_output);
+void no_input_message                                   (                                                                              bool verbose_output);
+void print_difference_between_program_and_correct_answer(const std::vector<size_t>& program_good_triangles, const std::vector<size_t>& correct_good_triangles);
+void print_find_triangles_information_good_triangles    (const std::vector<size_t>& program_good_triangles, const std::vector<size_t>& correct_good_triangles);
+void print_not_found_good_triangles                     (const std::vector<size_t>& program_good_triangles, const std::vector<size_t>& correct_good_triangles);
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -65,24 +68,27 @@ test_result_t parse_test_result(const RunProgram::program_result_t<coordinate_t>
         return test_result_t::DONT_CHECK_RESULT;
     }
 
+    const std::vector<size_t> correct_good_triangles = test_data     .get_good_triangles();
+    const std::vector<size_t> program_good_triangles = program_result.get_triangles     ();
+
     const size_t correct_good_traignles_quant = test_data     .get_good_triangles_quantity();
     const size_t program_good_triangles_quant = program_result.get_good_triangles_quantity();
 
-    if (program_good_triangles_quant != correct_good_traignles_quant)
-    {
-        bad_good_triangles_quant_message(program_good_triangles_quant, correct_good_traignles_quant, verbose_output);
-        test_failed_message(verbose_output);
-        return test_result_t::TEST_FAILED;
-    }
+    const bool is_good_triangles_quant_bad = (correct_good_traignles_quant !=
+                                              program_good_triangles_quant);
 
-    bool was_bad_triangle = false;
+    bool was_bad_triangle = is_good_triangles_quant_bad;
+
+    if (was_bad_triangle)
+        goto skip_cycle_because_false_triangles_quant;
 
     for (size_t i = 0; i < correct_good_traignles_quant; i++)
     {
-        const size_t program_i_good_triangle_number = program_result.get_number_of_i_good_triangle(i);
-        const size_t correct_i_good_triangle_number = test_data     .get_number_of_i_good_triangle(i);
+        const size_t program_i_good_triangle_number = program_good_triangles[i];
+        const size_t correct_i_good_triangle_number = correct_good_triangles[i];
 
-        if (program_i_good_triangle_number == correct_i_good_triangle_number) continue;
+        if (program_i_good_triangle_number == correct_i_good_triangle_number)
+            continue;
 
         was_bad_triangle = true;
         bad_i_good_triangle_message(i, program_i_good_triangle_number, correct_i_good_triangle_number, verbose_output);
@@ -90,6 +96,11 @@ test_result_t parse_test_result(const RunProgram::program_result_t<coordinate_t>
 
     if (was_bad_triangle)
     {
+        skip_cycle_because_false_triangles_quant:
+
+        if (verbose_output)
+            print_difference_between_program_and_correct_answer(program_good_triangles, correct_good_triangles);
+
         test_failed_message(verbose_output);
         return test_result_t::TEST_FAILED;
     }
@@ -126,7 +137,7 @@ void print_good_triangles(const RunProgram::program_result_t<coordinate_t>& prog
 
     if (verbose_output)
         std::cout << GREEN "The numbers of triangles that have intersections with others (" YELLOW BOLD
-                  << good_triangles_quant 
+                  << good_triangles_quant
                   << RESET_CONSOLE_OUT GREEN "):" BOLD << std::endl;
 
     for (size_t i = 0; i < good_triangles_quant; i++)
@@ -175,6 +186,73 @@ void no_input_message(bool verbose_output)
               << ((verbose_output) ? WHITE : "") << "I love you, because you give me chance, to relax "
               << ((verbose_output) ? RED   : "") << heart_for_good_tester_of_this_program << ((verbose_output) ? RESET_CONSOLE_OUT : "")
               << std::endl;
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+void print_difference_between_program_and_correct_answer(const std::vector<size_t>& program_good_triangles, const std::vector<size_t>& correct_good_triangles)
+{
+    print_find_triangles_information_good_triangles(program_good_triangles, correct_good_triangles);
+    print_not_found_good_triangles(program_good_triangles, correct_good_triangles);
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+void print_find_triangles_information_good_triangles(const std::vector<size_t>& program_good_triangles, const std::vector<size_t>& correct_good_triangles)
+{
+    std::cout << WHITE "Find triangles:\n" BOLD;
+
+    bool was_at_least_1_triangle_correct_find = false;
+
+    for (size_t program_good_triangles_number: program_good_triangles)
+    {
+        bool is_correct_find = (std::find(correct_good_triangles.begin(),
+                                          correct_good_triangles.end  (),
+                                          program_good_triangles_number
+                                        ) != correct_good_triangles.end());
+
+        was_at_least_1_triangle_correct_find = is_correct_find;
+
+        std::cout << ((is_correct_find) ? GREEN : RED)
+                  << program_good_triangles_number << " ";
+    }
+
+    if (!was_at_least_1_triangle_correct_find)
+    {
+        const size_t correct_good_trianlges_quant = correct_good_triangles.size();
+
+        std::cout << ((correct_good_trianlges_quant > 0) ? RED : GREEN)
+                  << "No one good triangle was found.";
+    }
+
+    std::cout << RESET_CONSOLE_OUT << std::endl;
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+void print_not_found_good_triangles(const std::vector<size_t>& program_good_triangles, const std::vector<size_t>& correct_good_triangles)
+{
+    std::cout << "\n" WHITE "Not find triangles:\n" BOLD RED;
+
+    bool was_all_triangles_not_found = true;
+
+    for (size_t correct_good_triangles_number: correct_good_triangles)
+    {
+        bool is_find = (std::find(program_good_triangles.begin(),
+                                  program_good_triangles.end  (),
+                                  correct_good_triangles_number
+                                ) != program_good_triangles.end());
+
+        if (is_find) continue;
+
+        was_all_triangles_not_found = false;
+        std::cout << correct_good_triangles_number << " ";
+    }
+
+    if (was_all_triangles_not_found)
+        std::cout << GREEN "All good triangles was found!";
+
+    std::cout << RESET_CONSOLE_OUT << std::endl;
 }
 
 //---------------------------------------------------------------------------------------------------------------

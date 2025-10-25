@@ -1,9 +1,10 @@
 #include <gtest/gtest.h>
-#include "relative_positions.hpp"
 
-using namespace Detail::Geometry;
 
 import line;
+
+using namespace Geometry::Detail;
+
 
 using fpoint = point_t<float>;
 using dpoint = point_t<double>;

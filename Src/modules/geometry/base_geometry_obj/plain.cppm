@@ -7,17 +7,14 @@ module;
 
 #include "global.hpp"
 #include "custom_console_output.hpp"
-#include "constants.hpp"
-#include "relative_positions.hpp"
+
+import constants;
 
 import compare;
 import matrix;
 
 #if defined(USE_LOGGER)
 import logger;
-
-#include <sstream>
-#include <string>
 #endif /*defined(USE_LOGGER)*/ 
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -26,7 +23,9 @@ export module plain;
 
 //----------------------------------------------------------------------------------------------------------------------------
 
+export import point;
 export import line;
+export import relative_positions;
 
 //----------------------------------------------------------------------------------------------------------------------------
 
@@ -105,27 +104,27 @@ template <typename coordinate_t>
 plain_t<coordinate_t>::plain_t(const point_t& a, const point_t& b, const point_t& c) :
 //y₁(z₂ - z₃) + y₂(z₃ - z₁) + y₃(z₁ - z₂)
 a_(
-a.get_y_coordinate() * (b.get_z_coordinate() - c.get_z_coordinate()) +
-b.get_y_coordinate() * (c.get_z_coordinate() - a.get_z_coordinate()) +
-c.get_y_coordinate() * (a.get_z_coordinate() - b.get_z_coordinate())
+a.get_y() * (b.get_z() - c.get_z()) +
+b.get_y() * (c.get_z() - a.get_z()) +
+c.get_y() * (a.get_z() - b.get_z())
 ),
 // b = x₁(z₃ - z₂) + x₂(z₁ - z₃) + x₃(z₂ - z₁)]
 b_(
-a.get_x_coordinate() * (c.get_z_coordinate() - b.get_z_coordinate()) +
-b.get_x_coordinate() * (a.get_z_coordinate() - c.get_z_coordinate()) +
-c.get_x_coordinate() * (b.get_z_coordinate() - a.get_z_coordinate())
+a.get_x() * (c.get_z() - b.get_z()) +
+b.get_x() * (a.get_z() - c.get_z()) +
+c.get_x() * (b.get_z() - a.get_z())
 ),
 // c = x₁(y₂ - y₃) + x₂(y₃ - y₁) + x₃(y₁ - y₂)
 c_(
-a.get_x_coordinate() * (b.get_y_coordinate() - c.get_y_coordinate()) +
-b.get_x_coordinate() * (c.get_y_coordinate() - a.get_y_coordinate()) +
-c.get_x_coordinate() * (a.get_y_coordinate() - b.get_y_coordinate())
+a.get_x() * (b.get_y() - c.get_y()) +
+b.get_x() * (c.get_y() - a.get_y()) +
+c.get_x() * (a.get_y() - b.get_y())
 ),
 // d = x₁(y₃z₂ - y₂z₃) + x₂(y₁z₃ - y₃z₁) + x₃(y₂z₁ - y₁z₂)]
 d_(
-a.get_x_coordinate() * (c.get_y_coordinate() * b.get_z_coordinate() - b.get_y_coordinate() * c.get_z_coordinate()) +
-b.get_x_coordinate() * (a.get_y_coordinate() * c.get_z_coordinate() - c.get_y_coordinate() * a.get_z_coordinate()) +
-c.get_x_coordinate() * (b.get_y_coordinate() * a.get_z_coordinate() - a.get_y_coordinate() * b.get_z_coordinate())
+a.get_x() * (c.get_y() * b.get_z() - b.get_y() * c.get_z()) +
+b.get_x() * (a.get_y() * c.get_z() - c.get_y() * a.get_z()) +
+c.get_x() * (b.get_y() * a.get_z() - a.get_y() * b.get_z())
 )
 {}
 
@@ -287,9 +286,9 @@ plain_t<coordinate_t>::get_second_ref_point_for_intersection_of_plain(const plai
                                    b_, plain.b_).get_determinate();
 
     return point_t(
-        first_ref_point.get_x_coordinate() + vx,
-        first_ref_point.get_y_coordinate() + vy,
-        first_ref_point.get_z_coordinate() + vz
+        first_ref_point.get_x() + vx,
+        first_ref_point.get_y() + vy,
+        first_ref_point.get_z() + vz
     );
 }
 

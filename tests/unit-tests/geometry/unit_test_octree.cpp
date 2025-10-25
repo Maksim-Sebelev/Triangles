@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-import octotree;
+import octree;
 
 
 TEST(FloatOctorTreeTesting, something)

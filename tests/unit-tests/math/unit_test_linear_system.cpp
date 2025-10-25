@@ -2,6 +2,8 @@
 
 import linear_systems;
 
+using namespace Math::LinearAlgebra;
+
 using fv_2 = vector_2_t<float>; 
 using dv_2 = vector_2_t<double>; 
 

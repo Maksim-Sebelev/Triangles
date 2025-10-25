@@ -30,22 +30,25 @@ function skip_line_in_console
 
 function check_that_exists
 {
-    local programm=$1
+    local program=$1
 
-    if ! command -v "${programm}" >/dev/null 2>&1; then
-        custom_echo_err "${CONSOLE_COLOR_RED}" "${CONSOLE_BIND_FONT}" "'${programm}' not found."
-        custom_echo_err "" "" "This script requires '${programm}' to be installed."
+    if ! command -v "${program}" >/dev/null 2>&1; then
+        custom_echo_err "${CONSOLE_COLOR_RED}" "${CONSOLE_BIND_FONT}" "'${program}' not found."
+        custom_echo_err "" "" "This script requires '${program}' to be installed."
         return 1
     fi
 
     return 0
 }
 
-function need_logger
+function find_option
 {
+    local needed_option="$1"
+    shift
+
     for option in "$@"
     do
-        if [ "$option" = "use-logger" ]; then
+        if [ "${option}" == "${needed_option}" ]; then
             return 0
         fi
     done
@@ -53,16 +56,19 @@ function need_logger
     return 1
 }
 
+function need_logger
+{
+    find_option "use-logger" "$@"
+}
+
 function need_verbose_output
 {
-    for option in "$@"
-    do
-        if [ "$option" = "verbose" ]; then
-            return 0
-        fi
-    done
+    find_option "verbose" "$@"
+}
 
-    return 1
+function need_graphic_dump
+{
+    find_option "graphic-dump" "$@"
 }
 
 build_dir="build"
@@ -94,37 +100,19 @@ skip_line_in_console
 # generating build system with optional logger
 custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "Generating build system..."
 
-if need_logger "$@" && need_verbose_output "$@"; then
-    custom_echo "${CONSOLE_COLOR_WHITE}" "" "cmake -G Ninja -S ${source_dir}/ -B ${build_dir}/ -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DUSE_LOGGER=1 -DVERBOSE_OUTPUT=1 -DCMAKE_EXPORT_COMPILE_COMMANDS=1"
-    cmake -G Ninja -S "${source_dir}/" -B "${build_dir}/" \
-        -DCMAKE_CXX_COMPILER=clang++ \
-        -DCMAKE_BUILD_TYPE=Debug \
-        -DUSE_LOGGER=1 \
-        -DVERBOSE_OUTPUT=1 \
-        -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+cmake_command="cmake \
+-G Ninja \
+-S ${source_dir} \
+-B ${build_dir} \
+-DCMAKE_CXX_COMPILER=clang++ \
+-DCMAKE_BUILD_TYPE=Debug \
+-DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+-DUSE_LOGGER=1 \
+-DVERBOSE_OUTPUT=1 \
+-DTREE_GRAPHIC_DUMP=1"
 
-elif need_logger "$@"; then
-    custom_echo "${CONSOLE_COLOR_WHITE}" "" "cmake -G Ninja -S ${source_dir}/ -B ${build_dir}/ -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DUSE_LOGGER=1 -DCMAKE_EXPORT_COMPILE_COMMANDS=1"
-    cmake -G Ninja -S "${source_dir}/" -B "${build_dir}/" \
-        -DCMAKE_CXX_COMPILER=clang++ \
-        -DCMAKE_BUILD_TYPE=Debug \
-        -DUSE_LOGGER=1 \
-        -DCMAKE_EXPORT_COMPILE_COMMANDS=1
-
-elif need_verbose_output "$@"; then
-    custom_echo "${CONSOLE_COLOR_WHITE}" "" "cmake -G Ninja -S ${source_dir}/ -B ${build_dir}/ -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DVERBOSE_OUTPUT=1 -DCMAKE_EXPORT_COMPILE_COMMANDS=1"
-    cmake -G Ninja -S "${source_dir}/" -B "${build_dir}/" \
-        -DCMAKE_CXX_COMPILER=clang++ \
-        -DCMAKE_BUILD_TYPE=Debug \
-        -DVERBOSE_OUTPUT=1 \
-        -DCMAKE_EXPORT_COMPILE_COMMANDS=1
-else
-    custom_echo "${CONSOLE_COLOR_WHITE}" "" "cmake -G Ninja -S ${source_dir}/ -B ${build_dir}/ -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=1"
-    cmake -G Ninja -S "${source_dir}/" -B "${build_dir}/" \
-        -DCMAKE_CXX_COMPILER=clang++ \
-        -DCMAKE_BUILD_TYPE=Debug \
-        -DCMAKE_EXPORT_COMPILE_COMMANDS=1
-fi
+custom_echo "${CONSOLE_COLOR_WHITE}" "" "${cmake_command}"
+eval ${cmake_command}
 
 custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "Generating build system completed successfully."
 skip_line_in_console
@@ -136,6 +124,42 @@ cmake --build "${build_dir}/"
 
 custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "Building project completed successfully."
 skip_line_in_console
+
+# crete shell script to fast run e2e test (needed for spot work with e2e test)
+run_test_script=${build_dir}/run_test
+custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "Create ${run_test_script}..."
+
+check_that_exists touch || exit 1
+check_that_exists echo  || exit 1
+
+touch ${run_test_script} || exit 1
+
+echo "#!/bin/bash"                                                                          >> ${run_test_script}
+echo ""                                                                                     >> ${run_test_script}
+echo "# DO NOT TRY TO EDIT THIS FILE."                                                      >> ${run_test_script}
+echo "# ALL YOUR CORRECTIONS WILL BE LOST."                                                 >> ${run_test_script}
+echo ""                                                                                     >> ${run_test_script}
+echo "# Automatic generated with:"                                                          >> ${run_test_script}
+echo "# '$(realpath $0)'"                                                                   >> ${run_test_script}
+echo "# at:"                                                                                >> ${run_test_script}
+echo "# $(date)"                                                                            >> ${run_test_script}
+echo ""                                                                                     >> ${run_test_script}
+echo "set -euo pipefail"                                                                    >> ${run_test_script}
+echo ""                                                                                     >> ${run_test_script}
+echo "if [ \$# -ne 1 ]; then"                                                               >> ${run_test_script}
+echo "    echo \"expect only 1 arg: number of test.\""                                      >> ${run_test_script}
+echo "    exit 1"                                                                           >> ${run_test_script}
+echo "fi"                                                                                   >> ${run_test_script}
+echo ""                                                                                     >> ${run_test_script}
+echo "n=\"\$1\""                                                                            >> ${run_test_script}
+echo "./run_triangles -v -ifiles ../tests/e2e/dat/\"\$n\".dat ../tests/e2e/ans/\"\$n\".ans" >> ${run_test_script}
+
+check_that_exists chmod     || exit 1
+chmod +x ${run_test_script} || exit 1
+
+custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "Creating ${run_test_script} completed successfully."
+skip_line_in_console
+
 
 custom_echo "${CONSOLE_COLOR_WHITE}" "${CONSOLE_BIND_FONT}" "To work with the project, execute:"
 custom_echo "${CONSOLE_COLOR_WHITE}" "" "cd ${build_dir}/"

@@ -3,6 +3,7 @@
 #include <cmath>
 
 import vector;
+using namespace Math::LinearAlgebra;
 
 using f_vec_2 = vector_2_t<float>;
 using d_vec_2 = vector_2_t<double>;
@@ -40,8 +41,8 @@ TEST(MathVectorTesing, FloatVectorSelfOperations)
 
 TEST(MathVectorTesting, FloatVectorOperationsWithAnotherVectrs)
 {
-    f_vec_2 v1(1.0, -1.0);
-    f_vec_2 v2(-1.0, -1.0);
+    f_vec_2 v1(1.0f, -1.0f);
+    f_vec_2 v2(-1.0f, -1.0f);
 
     // EXPECT_TRUE (v1.compare(v1));
     // EXPECT_TRUE (v2.compare(v2));
@@ -53,8 +54,8 @@ TEST(MathVectorTesting, FloatVectorOperationsWithAnotherVectrs)
     EXPECT_FLOAT_EQ(v2.get_mul_by_another_vector(v1), 0.0f);
 
 
-    v2 = v1.get_mul_by_number(2910.2005);
+    v2 = v1.get_mul_by_number(2910.2005f);
 
-    EXPECT_FLOAT_EQ(v2.get_a1(), 2910.2005);
-    EXPECT_FLOAT_EQ(v2.get_a2(), -2910.2005);
+    EXPECT_FLOAT_EQ(v2.get_a1(), 2910.2005f);
+    EXPECT_FLOAT_EQ(v2.get_a2(), -2910.2005f);
 }

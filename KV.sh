@@ -41,35 +41,6 @@ function check_that_exists
     return 0
 }
 
-function find_option
-{
-    local needed_option="$1"
-    shift
-
-    for option in "$@"
-    do
-        if [ "${option}" == "${needed_option}" ]; then
-            return 0
-        fi
-    done
-
-    return 1
-}
-
-function need_logger
-{
-    find_option "use-logger" "$@"
-}
-
-function need_verbose_output
-{
-    find_option "verbose" "$@"
-}
-
-function need_graphic_dump
-{
-    find_option "graphic-dump" "$@"
-}
 
 build_dir="build"
 source_dir="Src"
@@ -106,19 +77,8 @@ cmake_command="cmake \
 -B ${build_dir} \
 -DCMAKE_CXX_COMPILER=clang++ \
 -DCMAKE_BUILD_TYPE=Release \
--DCMAKE_EXPORT_COMPILE_COMMANDS=1"
-
-if need_logger "$@"; then
-    cmake_command="${cmake_command} -DUSE_LOGGER=1"
-fi
-
-if need_verbose_output "$@"; then
-    cmake_command="${cmake_command} -DVERBOSE_OUTPUT=1"
-fi
-
-if need_graphic_dump "$@"; then
-    cmake_command="${cmake_command} -DTREE_GRAPHIC_DUMP=1"
-fi
+-DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+-DTREE_GRAPHIC_DUMP=1"
 
 custom_echo "${CONSOLE_COLOR_WHITE}" "" "${cmake_command}"
 eval ${cmake_command}

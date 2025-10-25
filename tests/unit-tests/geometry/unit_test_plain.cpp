@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "relative_positions.hpp"
+
 
 import plain;
 
-using namespace Detail::Geometry;
+using namespace Geometry::Detail;
 
 using fpoint = point_t<float>;
 using dpoint = point_t<double>;
@@ -112,13 +112,13 @@ TEST(TestingFloatPlain, Ctor)
     EXPECT_TRUE(pl8.compare_with_another_plain(pl8_equal));
     EXPECT_TRUE(pl8_equal.compare_with_another_plain(pl8));
 
-    fpoint p25(1.36674,0.73458,0.80515);
-    fpoint p26(-0.4726,0.3774,0.78554);
-    fpoint p27(0.64906,-1.18033,1.40528);
+    fpoint p25(1.36674f,0.73458f,0.80515f);
+    fpoint p26(-0.4726f,0.3774f,0.78554f);
+    fpoint p27(0.64906f,-1.18033f,1.40528f);
 
-    fpoint p28(1.87, 1.52, 0.57);
-    fpoint p29(0.21, 0.86, 0.67);
-    fpoint p30(-1.57, -0.52, 1.01);
+    fpoint p28(1.87f, 1.52f, 0.57f);
+    fpoint p29(0.21f, 0.86f, 0.67f);
+    fpoint p30(-1.57f, -0.52f, 1.01f);
 
     fplain pl9(p25, p26, p27);
     fplain pl10(p28, p29, p30);

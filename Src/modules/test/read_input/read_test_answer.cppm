@@ -38,10 +38,11 @@ namespace Detail
 struct test_answer_t
 {
     public:
-        size_t get_good_triangles_quantity  (        ) const;
-        size_t get_number_of_i_good_triangle(size_t i) const;
+        size_t              get_good_triangles_quantity  (        ) const;
+        size_t              get_number_of_i_good_triangle(size_t i) const;
+        std::vector<size_t> get_triangles                (        ) const;
         ON_DEBUG(
-        void   dump                         (        ) const;
+        void                dump                         (        ) const;
         )
 
         /*
@@ -52,7 +53,7 @@ struct test_answer_t
         you check test result yourself.
         in that case answer is in stdout 
         */
-        test_answer_t() = default; // ctor for reading from stdin
+        test_answer_t() = default;                   // ctor for reading from stdin
         test_answer_t(std::string_view answer_file); // reading from .dat file
 
     private:
@@ -93,6 +94,13 @@ answer_file_           (answer_file)
 // public methodes
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------
+
+std::vector<size_t> test_answer_t::get_triangles() const
+{
+    return good_triangles_numbers_;
+}
+
 //---------------------------------------------------------------------------------------------------------------
 
 size_t test_answer_t::get_good_triangles_quantity() const

@@ -58,7 +58,7 @@ cd Triangles
 bash KV.sh && cd build
 ```
 
-**Не спешите собирать проект руками, в проекта есть удобный shell-скрипт для этого**\
+**Не спешите собирать проект руками, в проекте есть удобный shell-скрипт для этого**\
 Для генерации системы сборки выполните:
 ```bash
 cmake -S Src -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANNDS=1

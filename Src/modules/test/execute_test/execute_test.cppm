@@ -83,10 +83,7 @@ program_result_t<coordinate_t>::program_result_t(const InputData::test_data_t<co
     tree.find_intersections();
 
     ON_LOGGER (tree.dump   ());
-    /*ON_2D_DUMP(*/tree.dump_2d("first_dump")/*)*/;
-    tree.dump_2d();
-    tree.dump_2d();
-    tree.dump_2d();
+    ON_2D_DUMP(tree.dump_2d());
 
 
     numbers_of_good_triangles_ = tree                      .get_good_triangles();

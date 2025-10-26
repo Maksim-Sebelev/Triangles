@@ -405,23 +405,25 @@ endif()
 
 # add 2d dump
 if (TREE_2D_DUMP)
+    find_program(DOT_EXECUTABLE 
+        NAMES dot dot.exe
+        DOC "Graphviz dot executable"
+    )
 
-    set(GRAPHVIZ_COMMAND dot)
-
-    if (WIN32)
-        set(find_command where)
-    else() # expect unix
-        set(find_command which)
+    if (NOT DOT_EXECUTABLE)
+        message(FATAL_ERROR "Graphviz NOT find. You can use program anyway, just do not use option -DTREE_2D_DAMP")
     endif()
 
-    # execute_process(
-        # COMMAND ${find_command} ${include(CMakeGraphVizOptions)}
-    # )
-
+    set(2D_DUMP_MACRO DUMP_2D)
 
     target_compile_definitions(${OCTREE_LIB}
         PRIVATE
-            DUMP_2D
+            ${2D_DUMP_MACRO}
+    )
+
+    target_compile_definitions(${TEST_LIB} # this dump made in Src/modules/test/execute_test/execute_test.cppm
+        PRIVATE
+            ${2D_DUMP_MACRO}
     )
 
 endif()

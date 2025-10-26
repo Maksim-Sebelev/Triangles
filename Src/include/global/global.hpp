@@ -51,3 +51,22 @@ if (!(bool_expression)) {                                \
 #endif /* defined(USE_LOGGER) */
 
 //---------------------------------------------------------------------------------------------------------------
+
+#if defined(DUMP_2D)
+#define ON_2D_DUMP(...) __VA_ARGS__
+#include <iostream>
+#include <string>
+#include <sstream>
+#else /* defined(DUMP_2D) */
+#define ON_2D_DUMP(...)
+#endif /* defined(DUMP_2D) */
+
+//---------------------------------------------------------------------------------------------------------------
+
+#if defined(DUMP_3D)
+#define ON_3D_DUMP(...) __VA_ARGS__
+#else
+#define ON_3D_DUMP(...)
+#endif /* defined(DUMP_3D) */
+
+//---------------------------------------------------------------------------------------------------------------

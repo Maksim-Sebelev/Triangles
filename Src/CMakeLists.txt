@@ -98,7 +98,7 @@ set(MODULES_DIR                  ${PROJECT_SOURCE_DIR}/modules)
 
 # =============================================================================================================
 
-set(MATH_LIB math_lib)
+set(MATH_LIB math)
 
 set(MATH_MODULE_DIR ${MODULES_DIR}/math)
 
@@ -131,7 +131,7 @@ set(GEOMETRY_MODULES_DIR ${MODULES_DIR}/geometry)
 
 # =============================================================================================================
 
-set(GLOBAL_GEOMETRY_LIB _global_geometry)
+set(GLOBAL_GEOMETRY_LIB global_geometry)
 add_library(${GLOBAL_GEOMETRY_LIB})
 
 set(GLOBAL_GEOMETRY_MODULES_DIR ${GEOMETRY_MODULES_DIR}/global)
@@ -157,7 +157,7 @@ target_debug_options(${GLOBAL_GEOMETRY_LIB})
 
 # =============================================================================================================
 
-set(HELP_GEOMETRY_LIB _help_geometry)
+set(HELP_GEOMETRY_LIB help_geometry)
 add_library(${HELP_GEOMETRY_LIB})
 
 set(HELP_GEOMETRY_MODULES_DIR ${GEOMETRY_MODULES_DIR}/base_geometry_obj)
@@ -189,7 +189,7 @@ target_debug_options(${HELP_GEOMETRY_LIB})
 
 # =============================================================================================================
 
-set(TRIANGLES_LIB _triangles)
+set(TRIANGLES_LIB triangles)
 add_library(${TRIANGLES_LIB})
 
 set(TRIANGLE_MODULES_DIR ${GEOMETRY_MODULES_DIR}/triangle)
@@ -221,7 +221,7 @@ target_debug_options(${TRIANGLES_LIB})
 
 # =============================================================================================================
 
-set(OCTREE_LIB _octree)
+set(OCTREE_LIB octree)
 add_library(${OCTREE_LIB})
 
 set(OCTREE_MODULES_DIR ${GEOMETRY_MODULES_DIR}/tree)
@@ -254,7 +254,7 @@ target_debug_options(${OCTREE_LIB})
 
 # =============================================================================================================
 
-set(TEST_LIB _test)
+set(TEST_LIB testing)
 add_library(${TEST_LIB})
 
 set(TEST_LIB_SRC_DIR ${MODULES_DIR}/test)
@@ -403,8 +403,37 @@ endif()
 
 # =============================================================================================================
 
-if (TREE_GRAPHIC_DUMP)
-    
+# add 2d dump
+if (TREE_2D_DUMP)
+
+    set(GRAPHVIZ_COMMAND dot)
+
+    if (WIN32)
+        set(find_command where)
+    else() # expect unix
+        set(find_command which)
+    endif()
+
+    # execute_process(
+        # COMMAND ${find_command} ${include(CMakeGraphVizOptions)}
+    # )
+
+
+    target_compile_definitions(${OCTREE_LIB}
+        PRIVATE
+            DUMP_2D
+    )
+
+endif()
+
+# =============================================================================================================
+
+# add 3d dump
+if (TREE_3D_DUMP)
+    target_compile_definitions(${OCTREE_LIB}
+        PRIVATE
+            DUMP_3D
+    )
 endif()
 # =============================================================================================================
 # =============================================================================================================

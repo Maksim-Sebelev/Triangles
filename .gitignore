@@ -13,6 +13,9 @@ project_struct/
 # logger output
 log/
 
+# octree dump dir
+2d-dump/
+
 # start.sh analogue shell-script with personally logger settings
 my_start.sh
 

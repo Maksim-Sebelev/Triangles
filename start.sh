@@ -66,9 +66,14 @@ function need_verbose_output
     find_option "verbose" "$@"
 }
 
-function need_graphic_dump
+function need_2d_dump
 {
-    find_option "graphic-dump" "$@"
+    find_option "2d-dump" "$@"
+}
+
+function need_3d_dump
+{
+    find_option "3d-dump" "$@"
 }
 
 build_dir="build"
@@ -116,8 +121,12 @@ if need_verbose_output "$@"; then
     cmake_command="${cmake_command} -DVERBOSE_OUTPUT=1"
 fi
 
-if need_graphic_dump "$@"; then
-    cmake_command="${cmake_command} -DTREE_GRAPHIC_DUMP=1"
+if need_2d_dump "$@"; then
+    cmake_command="${cmake_command} -DTREE_2D_DUMP=1"
+fi
+
+if need_3d_dump "$@"; then
+    cmake_command="${cmake_command} -DTREE_3D_DUMP=1"
 fi
 
 custom_echo "${CONSOLE_COLOR_WHITE}" "" "${cmake_command}"

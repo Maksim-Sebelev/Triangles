@@ -109,7 +109,8 @@ cmake_command="cmake \
 -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
 -DUSE_LOGGER=1 \
 -DVERBOSE_OUTPUT=1 \
--DTREE_GRAPHIC_DUMP=1"
+-DTREE_2D_DUMP=1 \
+-DTREE_3D_DUMP=1"
 
 custom_echo "${CONSOLE_COLOR_WHITE}" "" "${cmake_command}"
 eval ${cmake_command}

@@ -3,7 +3,7 @@
 #include <string>
 
 import read_test_answer;
-using namespace InputData::Detail;
+using namespace InputData;
 
 #define WAY_FROM_BUILD_TO_THIS_TEST_DATA_DIR "../tests/e2e/ans/"
 

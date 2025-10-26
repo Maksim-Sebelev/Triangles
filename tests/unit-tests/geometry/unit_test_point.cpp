@@ -5,7 +5,8 @@
 
 import point;
 
-using namespace Geometry::Detail;
+using namespace Geometry;
+
 
 using fpoint = point_t<float>;
 using dpoint = point_t<double>;

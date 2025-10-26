@@ -42,21 +42,21 @@ constexpr option long_options[] =
 
 //---------------------------------------------------------------------------------------------------------------
 
-using namespace InputData::Detail;
-
-//--------------------------------------------------------------------------------------------------------------
-
-constexpr std::pair<input_stream, std::string> input_stream_flag_values[] =
+constexpr std::pair<InputData::input_stream, std::string> input_stream_flag_values[] =
 {
-    {input_stream::standart_input      , "stdin"},
-    {input_stream::dat_file_stream     , "files"},
-    {input_stream::invalid_input_stream, ""     },
+    {InputData::input_stream::standart_input      , "stdin"},
+    {InputData::input_stream::dat_file_stream     , "files"},
+    {InputData::input_stream::invalid_input_stream, ""     },
 };
 
 //---------------------------------------------------------------------------------------------------------------
 
 export namespace FlagsParsing
 {
+
+//---------------------------------------------------------------------------------------------------------------
+
+using namespace InputData;
 
 //---------------------------------------------------------------------------------------------------------------
 

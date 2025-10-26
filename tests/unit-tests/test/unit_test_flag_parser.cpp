@@ -4,7 +4,8 @@ import flags_parser;
 import input_stream;
 
 using namespace FlagsParsing;
-using namespace InputData::Detail;
+using namespace InputData;
+
 
 TEST(FlagParserTesting, FileStream_1)
 {

@@ -55,11 +55,9 @@ class octree_t
 
     using triangle_and_box = std::pair<triangle_t, bounding_box_t>;
 
-    // static constexpr coordinate_t min_bbox_side_length = static_cast<coordinate_t>(0.001);
     static constexpr size_t       children_quant       = 8;
 
     private:
-        // std::vector<triangle_number_box> triangles_numbers_boxes_;
         size_t                        triangles_quantity_                                      ;
         std::vector<triangle_and_box> triangles_and_boxes_                                     ;
         std::vector<bool>             numbers_of_triangles_that_have_intersections_with_others_;
@@ -214,7 +212,7 @@ octree_t<coordinate_t>::split_node(node_t* node)
 
             if (!triangle_bbox.is_inside(children_bboxes[child_it]))
             {
-                triangles_it++;
+                ++triangles_it;
                 continue;
             }
 

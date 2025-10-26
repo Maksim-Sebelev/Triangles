@@ -71,7 +71,7 @@ cd build
 ```
 
 ## Опции Cmake:
-Предоставляются так же несколько дополнительных опций для сборки проекта:
+Предоставляются так же несколько дополнительных опций для сборки проекта:\
 `USE_LOGGER`\
 `TREE_GRAPHIC_DUMP`\
 `VERBOSE_OUTPUT`
@@ -94,7 +94,7 @@ cmake -S Src -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANND
 
 
 ## Об опциях cmake:
-`USE_LOGGER` - включает логгер (`Src/third-party/logger`) в проект и определяет макрос `USE_LOGGER` для всех файлов проекта. После этого можно использовать логгер в любом файле проекта. *Подробнее про логгер можно прочиать в его официльном [репозитории](https://github.com/Maksim-Sebelev/logger.git) или в `README.md` по относительному пути `./Src/third-party/logger/README.md`*
+`USE_LOGGER` - включает логгер (`Src/third-party/logger`) в проект и определяет макрос `USE_LOGGER` для всех файлов проекта. После этого можно использовать логгер в любом файле проекта. *Подробнее про логгер можно прочитать в его официльном [репозитории](https://github.com/Maksim-Sebelev/logger.git) или в `README.md` по относительному пути `./Src/third-party/logger/README.md`*
 
 <br>
 
@@ -140,7 +140,7 @@ bash start.sh use-logger verbose graphic-dump
 ```bash
 cd build/
 ```
-и теперь можете начинать работать с проектом.\
+и теперь можете начинать работать с проектом.
 
 <br>
 
@@ -350,7 +350,7 @@ using coordinate_t = float;
 ```
 
 # Тестирование программы:
-В директории `./tests` есть 3 поддиректории: `dat`, `ans`, `unit-tests`:
+В директории `./tests` есть 2 поддиректории: `e2e` и `unit-tests`:
 ```bash
 tests
     ├── e2e
@@ -381,7 +381,7 @@ tests
             └── unit_test_read_test_data.cpp
 ```
 
-Для unit-тестирования используется `googletest` (он был установлен когда вы запускали `cmake`).\
+Для unit-тестирования используется `googletest` (cmake не выполнит сборку проекта, если он не установлен `cmake`).\
 Все модули программы проходят unit-тестирования. Вот так выглядит папка для тестирования:
 ```bash
 unit-tests
@@ -403,7 +403,7 @@ unit-tests
         └── unit_test_read_test_data.cpp
 ```
 
-Так же есть e2e (end to end) тесты. Для этого в папках `./tests/e2e/dat/` и `./tests/e2e/ans/` хранятся файлы с тестовыми данными и правильными ответами соотвественно.\
+Так же есть e2e (end to end) тесты. Для этого в папках `./tests/e2e/dat/` и `./tests/e2e/ans/` хранятся файлы с тестовыми данными и правильными ответами соотвественно.
 
 Для компиляции тестов выполните:
 ```bash
@@ -439,7 +439,8 @@ fi
 n="$1"
 ./run_triangles -v -ifiles ../tests/e2e/dat/"$n".dat ../tests/e2e/ans/"$n".ans
 ```
-Здесь показан пример сгенерированного файла, строчки с путем до файла и временем генерации у вас конечно будут другие.\
+- Здесь показан пример сгенерированного файла, строчки с путем до файла и временем генерации у вас конечно будут другие.
+
 Скрипт позволяет быстро запускать определенный e2e-тест с подробным выводом (опция `-v`), например:
 ```bash
 ./run_test 1
@@ -465,7 +466,7 @@ template <typename coordinate_t> class triangle_t;
 ```
 имеет метод:
 ```cpp
-bool is_intersect_with_another_triangle(const triangle_t& triangle) const;
+bool is_intersect_with_another_triangle(const triangle_t& trianglebool, bool parse_degenerate_triangles = false) const;
 ```
 *(его асимтотическая сложность `O(1)`)*\
 думаю смысл его понятен.

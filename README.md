@@ -451,7 +451,7 @@ ctest
 ```bash
 ctest --verbose
 ```
-Так же для более удобной и быстрой работы с определенными e2e тестами автоматически генерируется (с правом на исполнение) файл `build/run_test`:
+Так же для более удобной и быстрой работы с определенными e2e тестами автоматически генерируется при запуске `debug_start.sh` (с правом на исполнение) файл `build/run_test`:
 ```bash
 #!/bin/bash
 
@@ -459,7 +459,7 @@ ctest --verbose
 # ALL YOUR CORRECTIONS WILL BE LOST.
 
 # Automatic generated with:
-# '/home/ananasik/projects/C++/vlados/2/triangles/3_version/start.sh'
+# '/home/ananasik/projects/C++/vlados/2/triangles/3_version/debug_start.sh'
 # at:
 # Sat Oct 25 11:49:38 AM MSK 2025
 

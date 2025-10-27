@@ -143,41 +143,8 @@ cmake --build "${build_dir}/"
 custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "Building project completed successfully."
 skip_line_in_console
 
-# crete shell script to fast run e2e test (needed for spot work with e2e test)
-run_test_script=${build_dir}/run_test
-custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "Create ${run_test_script}..."
-
-check_that_exists touch || exit 1
-check_that_exists echo  || exit 1
-
-touch ${run_test_script} || exit 1
-
-echo "#!/bin/bash"                                                                          >> ${run_test_script}
-echo ""                                                                                     >> ${run_test_script}
-echo "# DO NOT TRY TO EDIT THIS FILE."                                                      >> ${run_test_script}
-echo "# ALL YOUR CORRECTIONS WILL BE LOST."                                                 >> ${run_test_script}
-echo ""                                                                                     >> ${run_test_script}
-echo "# Automatic generated with:"                                                          >> ${run_test_script}
-echo "# '$(realpath $0)'"                                                                   >> ${run_test_script}
-echo "# at:"                                                                                >> ${run_test_script}
-echo "# $(date)"                                                                            >> ${run_test_script}
-echo ""                                                                                     >> ${run_test_script}
-echo "set -euo pipefail"                                                                    >> ${run_test_script}
-echo ""                                                                                     >> ${run_test_script}
-echo "if [ \$# -ne 1 ]; then"                                                               >> ${run_test_script}
-echo "    echo \"expect only 1 arg: number of test.\""                                      >> ${run_test_script}
-echo "    exit 1"                                                                           >> ${run_test_script}
-echo "fi"                                                                                   >> ${run_test_script}
-echo ""                                                                                     >> ${run_test_script}
-echo "n=\"\$1\""                                                                            >> ${run_test_script}
-echo "./run_triangles -v -ifiles ../tests/e2e/dat/\"\$n\".dat ../tests/e2e/ans/\"\$n\".ans" >> ${run_test_script}
-
-check_that_exists chmod     || exit 1
-chmod +x ${run_test_script} || exit 1
-
 custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "Creating ${run_test_script} completed successfully."
 skip_line_in_console
-
 
 custom_echo "${CONSOLE_COLOR_WHITE}" "${CONSOLE_BIND_FONT}" "To work with the project, execute:"
 custom_echo "${CONSOLE_COLOR_WHITE}" "" "cd ${build_dir}/"

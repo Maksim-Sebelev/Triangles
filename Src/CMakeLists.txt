@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28) # 3.28 for modules
 
 project(Triangles
     LANGUAGES CXX
-    VERSION 2.0
+    VERSION 2.1
 )
 
 set(CMAKE_CXX_STANDARD 23)
@@ -72,11 +72,6 @@ function(target_debug_options target)
                 >
         )
 
-        target_compile_definitions(${target}
-            PRIVATE
-                $<$<CONFIG:Debug>:_DEBUG>
-        )
-
         # linking sanitizers
         target_link_options(${target}
             PRIVATE
@@ -91,16 +86,19 @@ endfunction(target_debug_options)
 # set some variables for add_executale
 
 # set some include directories
-set(GLOBAL_INCLUDE_DIR           ${PROJECT_SOURCE_DIR}/include/global)
-set(GENERATE_PROGRAM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include/create_run_program_file) # for some cringe
 
-set(MODULES_DIR                  ${PROJECT_SOURCE_DIR}/modules)
+set(INCLUDE_DIR                  ${CMAKE_SOURCE_DIR}/include)
+
+set(GLOBAL_INCLUDE_DIR           ${INCLUDE_DIR}/global)
+set(GENERATE_PROGRAM_INCLUDE_DIR ${INCLUDE_DIR}/create_run_program_file) # for some cringe
+
+set(SRC_DIR                      ${PROJECT_SOURCE_DIR}/src)
 
 # =============================================================================================================
 
 set(MATH_LIB math)
 
-set(MATH_MODULE_DIR ${MODULES_DIR}/math)
+set(MATH_MODULE_DIR ${SRC_DIR}/math)
 
 add_library(${MATH_LIB})
 
@@ -127,7 +125,7 @@ target_debug_options(${MATH_LIB})
 
 # =============================================================================================================
 
-set(GEOMETRY_MODULES_DIR ${MODULES_DIR}/geometry)
+set(GEOMETRY_MODULES_DIR ${SRC_DIR}/geometry)
 
 # =============================================================================================================
 
@@ -254,49 +252,115 @@ target_debug_options(${OCTREE_LIB})
 
 # =============================================================================================================
 
-set(TEST_LIB testing)
-add_library(${TEST_LIB})
+set(READ_INPUT_LIB read_input)
+add_library(${READ_INPUT_LIB})
 
-set(TEST_LIB_SRC_DIR ${MODULES_DIR}/test)
+set(READ_INPUT_LIB_SRC_DIR ${SRC_DIR}/read_input)
 
-set(TEST_LIB_SRC
-    ${TEST_LIB_SRC_DIR}/global/test_files.cppm
-    ${TEST_LIB_SRC_DIR}/flag_parse/flag_parser.cppm
-    ${TEST_LIB_SRC_DIR}/read_input/read_test_data.cppm
-    ${TEST_LIB_SRC_DIR}/read_input/read_test_answer.cppm
-    ${TEST_LIB_SRC_DIR}/read_input/get_test_data.cppm
-    ${TEST_LIB_SRC_DIR}/read_input/input_stream.cppm
-    ${TEST_LIB_SRC_DIR}/parse_result/parse_test_result.cppm
-    ${TEST_LIB_SRC_DIR}/execute_test/execute_test.cppm
+set(READ_INPUT_SRC
+    ${READ_INPUT_LIB_SRC_DIR}/read_input_data.cppm
 )
 
-target_sources(${TEST_LIB}
+target_sources(${READ_INPUT_LIB}
     PUBLIC
         FILE_SET CXX_MODULES
         TYPE     CXX_MODULES
-        FILES ${TEST_LIB_SRC}
+        FILES ${READ_INPUT_SRC}
 )
 
-target_include_directories(${TEST_LIB}
+target_include_directories(${READ_INPUT_LIB}
     PRIVATE
         ${GLOBAL_INCLUDE_DIR}
 )
 
-target_link_libraries(${TEST_LIB}
+target_link_libraries(${READ_INPUT_LIB}
     PUBLIC
-        ${OCTREE_LIB}
+        ${TRIANGLES_LIB}
 )
 
 # NOT default cmake functions
 # this is my function, defined in 14 line of this `CMakeLists.txt` file
 # set some compile options for test_lib
-target_debug_options(${TEST_LIB})
+target_debug_options(${READ_INPUT_LIB})
+
+# =============================================================================================================
+
+set(FLAGS_PARSER_LIB flags_parser)
+add_library(${FLAGS_PARSER_LIB})
+
+set(FLAGS_PARSER_LIB_SRC_DIR ${SRC_DIR}/flags_parser)
+
+set(FLAGS_PARSER_SRC
+    ${FLAGS_PARSER_LIB_SRC_DIR}/flags_parser.cppm
+)
+
+target_sources(${FLAGS_PARSER_LIB}
+    PUBLIC
+        FILE_SET CXX_MODULES
+        TYPE     CXX_MODULES
+        FILES ${FLAGS_PARSER_SRC}
+)
+
+target_include_directories(${FLAGS_PARSER_LIB}
+    PRIVATE
+        ${GLOBAL_INCLUDE_DIR}
+)
+
+target_link_libraries(${FLAGS_PARSER_LIB}
+    PUBLIC
+        ${TRIANGLES_LIB}
+)
+
+# NOT default cmake functions
+# this is my function, defined in 14 line of this `CMakeLists.txt` file
+# set some compile options for test_lib
+target_debug_options(${FLAGS_PARSER_LIB})
+
+# =============================================================================================================
+
+set(TRIANGLES_INTERSECTIONS_LIB find_triangles_intersections)
+add_library(${TRIANGLES_INTERSECTIONS_LIB})
+
+set(TRIANGLES_INTERSECTIONS_LIB_SRC_DIR ${SRC_DIR}/run_triangles_intersection)
+
+set(TRIANGLES_INTERSECTIONS_SRC
+    ${TRIANGLES_INTERSECTIONS_LIB_SRC_DIR}/run_triangles_intersection.cppm
+)
+
+target_sources(${TRIANGLES_INTERSECTIONS_LIB}
+    PUBLIC
+        FILE_SET CXX_MODULES
+        TYPE     CXX_MODULES
+        FILES ${TRIANGLES_INTERSECTIONS_SRC}
+)
+
+target_include_directories(${TRIANGLES_INTERSECTIONS_LIB}
+    PRIVATE
+        ${GLOBAL_INCLUDE_DIR}
+)
+
+target_link_libraries(${TRIANGLES_INTERSECTIONS_LIB}
+    PUBLIC
+        ${TRIANGLES_LIB}
+        ${OCTREE_LIB}
+        ${FLAGS_PARSER_LIB}
+        ${READ_INPUT_LIB}
+)
+
+# NOT default cmake functions
+# this is my function, defined in 14 line of this `CMakeLists.txt` file
+# set some compile options for test_lib
+target_debug_options(${TRIANGLES_INTERSECTIONS_LIB})
+
+# =============================================================================================================
+
+set(MAIN_SRC_DIR ${SRC_DIR}/main)
 
 # =============================================================================================================
 
 # set name main (and the only one) executable file of this project (float coordainate type)
-set(TRIANGLES_EXE           run_triangles                                    )
-set(TRIANGLES_MAIN_SOURCE   ${PROJECT_SOURCE_DIR}/src/run_float_triangles.cpp)
+set(TRIANGLES_EXE           run_triangles                          )
+set(TRIANGLES_MAIN_SOURCE   ${MAIN_SRC_DIR}/run_float_triangles.cpp)
 
 add_executable(${TRIANGLES_EXE}
                ${TRIANGLES_MAIN_SOURCE}
@@ -305,13 +369,14 @@ add_executable(${TRIANGLES_EXE}
 # include all headers
 target_include_directories(${TRIANGLES_EXE}
     PRIVATE
-        ${GLOBAL_INCLUDE_DIR}
         ${GENERATE_PROGRAM_INCLUDE_DIR}
 )
 
 target_link_libraries(${TRIANGLES_EXE}
     PRIVATE
-        ${TEST_LIB}
+        ${READ_INPUT_LIB}
+        ${FLAGS_PARSER_LIB}
+        ${TRIANGLES_INTERSECTIONS_LIB}
 )
 
 # NOT default cmake functions
@@ -321,8 +386,8 @@ target_debug_options(${TRIANGLES_EXE})
 
 # =============================================================================================================
 # for fun adding a double coordinate type triangles
-set(DOUBLE_TRIANGLES_EXE           run_double_triangles                              )
-set(DOUBLE_TRIANGLES_MAIN_SOURCE   ${PROJECT_SOURCE_DIR}/src/run_double_triangles.cpp)
+set(DOUBLE_TRIANGLES_EXE           run_double_triangles                         )
+set(DOUBLE_TRIANGLES_MAIN_SOURCE   ${MAIN_SRC_DIR}/run_long_double_triangles.cpp)
 
 add_executable(${DOUBLE_TRIANGLES_EXE}
             ${DOUBLE_TRIANGLES_MAIN_SOURCE}
@@ -331,13 +396,14 @@ add_executable(${DOUBLE_TRIANGLES_EXE}
 # include all headers
 target_include_directories(${DOUBLE_TRIANGLES_EXE}
     PRIVATE
-        ${GLOBAL_INCLUDE_DIR}
         ${GENERATE_PROGRAM_INCLUDE_DIR}
 )
 
 target_link_libraries(${DOUBLE_TRIANGLES_EXE}
     PRIVATE
-        ${TEST_LIB}
+        ${READ_INPUT_LIB}
+        ${FLAGS_PARSER_LIB}
+        ${TRIANGLES_INTERSECTIONS_LIB}
 )
 
 # NOT default cmake functions
@@ -358,7 +424,7 @@ add_custom_target(${REBUILD_TARGET}
 )
 
 # =============================================================================================================
-# TODO: compile logger as external project (ExternalProject_Add)
+# TODO: add logger as external project (ExternalProject_Add)
 
 # add logger if defined USE_LOGGER flag
 if (USE_LOGGER)
@@ -388,7 +454,7 @@ if (USE_LOGGER)
         ${HELP_GEOMETRY_LIB}
         ${TRIANGLES_LIB}
         ${OCTREE_LIB}
-        ${TEST_LIB}
+        ${READ_INPUT_LIB}
         ${MATH_LIB}
         ${ALL_UNIT_TESTS_TARGET}
     )
@@ -421,9 +487,14 @@ if (TREE_2D_DUMP)
             ${2D_DUMP_MACRO}
     )
 
-    target_compile_definitions(${TEST_LIB} # this dump made in Src/modules/test/execute_test/execute_test.cppm
+    target_compile_definitions(${TRIANGLES_INTERSECTIONS_LIB} # this dump made in Src/modules/test/execute_test/execute_test.cppm
         PRIVATE
             ${2D_DUMP_MACRO}
+    )
+
+    add_custom_target(dot_clean
+        COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_BINARY_DIR}/../2d-dump"
+        COMMENT "remove graphviz out dir"
     )
 
 endif()
@@ -437,6 +508,7 @@ if (TREE_3D_DUMP)
             DUMP_3D
     )
 endif()
+
 # =============================================================================================================
 # =============================================================================================================
 # =============================================================================================================
@@ -638,72 +710,25 @@ add_custom_target(${GEOMETRY_UNIT_TESTS_TARGET}
 )
 
 # =============================================================================================================
-# create read answer unit test
-
-set(READ_ANS_UNIT_TEST_EXE read_ans_unit_test                             )
-set(READ_ANS_UNIT_TEST_SRC ${UNIT_TEST_DIR}/test/unit_test_read_answer.cpp)
-
-target_unit_test(
-    "${READ_ANS_UNIT_TEST_EXE}"
-    "${READ_ANS_UNIT_TEST_SRC}"
-    "${TEST_LIB}"
-)
-
-# =============================================================================================================
 # create read test data unit test
 
-set(READ_TEST_DATA_UNIT_TEST_EXE read_test_data_unit_test                          )
-set(READ_TEST_DATA_UNIT_TEST_SRC ${UNIT_TEST_DIR}/test/unit_test_read_test_data.cpp)
+set(READ_INPUT_DATA_UNIT_TEST_EXE read_test_data_unit_test                          )
+set(READ_INPUT_DATA_UNIT_TEST_SRC ${UNIT_TEST_DIR}/read_input_data/unit_test_read_input_data.cpp)
 
 target_unit_test(
-    "${READ_TEST_DATA_UNIT_TEST_EXE}"
-    "${READ_TEST_DATA_UNIT_TEST_SRC}"
-    "${TEST_LIB}"
+    "${READ_INPUT_DATA_UNIT_TEST_EXE}"
+    "${READ_INPUT_DATA_UNIT_TEST_SRC}"
+    "${READ_INPUT_LIB}"
 )
 
-# =============================================================================================================
-# create flag parser unit test
-
-set(FLAG_PARSER_UNIT_TEST_EXE flag_parser_unit_test                          )
-set(FLAG_PARSER_UNIT_TEST_SRC ${UNIT_TEST_DIR}/test/unit_test_flag_parser.cpp)
-
-target_unit_test(
-    "${FLAG_PARSER_UNIT_TEST_EXE}"
-    "${FLAG_PARSER_UNIT_TEST_SRC}"
-    "${TEST_LIB}"
-)
-
-# =============================================================================================================
-# create get test data unit test
-
-set(GET_TEST_DATA_UNIT_TEST_EXE get_test_data_unit_test                          )
-set(GET_TEST_DATA_UNIT_TEST_SRC ${UNIT_TEST_DIR}/test/unit_test_get_test_data.cpp)
-
-target_unit_test(
-    "${GET_TEST_DATA_UNIT_TEST_EXE}"
-    "${GET_TEST_DATA_UNIT_TEST_SRC}"
-    "${TEST_LIB}"
-)
-
-# =============================================================================================================
-
-set(TEST_DATA_UNIT_TESTS
-    ${READ_ANS_UNIT_TEST_EXE}
-    ${READ_TEST_DATA_UNIT_TEST_EXE}
+set(READ_INPUT_UNIT_TESTS
     ${FLAG_PARSER_UNIT_TEST_EXE}
-    ${GET_TEST_DATA_UNIT_TEST_EXE}
-)
-
-set(TEST_DATA_UNIT_TESTS_TARGET     test_data_unit_tests    )
-
-add_custom_target(${TEST_DATA_UNIT_TESTS_TARGET}
-    DEPENDS ${TEST_DATA_UNIT_TESTS}
 )
 
 # =============================================================================================================
 
 set(ALL_UNIT_TESTS_TARGET
-    ${TEST_DATA_UNIT_TESTS}
+    ${READ_INPUT_UNIT_TESTS}
     ${MATH_UNIT_TESTS}
     ${GEOMETRY_UNIT_TESTS}
 )
@@ -718,7 +743,7 @@ add_custom_target(${BUILD_ALL_UNIT_TESTS_TARGET}
 include(CTest)
 
 # function for adding tests (not unit) to some executable files
-function(target_e2e_test test_executable test_dir ans_dir)
+function(target_e2e_test test_executable run_script test_dir ans_dir)
 
     file(GLOB test_files "${test_dir}/*.dat") # save all tests -files in variable 'test_files'
 
@@ -733,7 +758,6 @@ function(target_e2e_test test_executable test_dir ans_dir)
 
     # add tests
     foreach(test_file ${test_files})
-
         # get name of answer file
         get_filename_component(test_file_name "${test_file}" NAME_WE) # NAME_WE = without extension
         set(answer_file "${ans_dir}/${test_file_name}.ans")
@@ -741,17 +765,12 @@ function(target_e2e_test test_executable test_dir ans_dir)
         # create test_name
         set(test_name ${test_executable}_${test_file_name})
 
-        if (VERBOSE_OUTPUT)
-            set(TEST_COMMAND ./${test_executable} --verbose --input_stream=files ${test_file} ${answer_file})
-        else()
-            set(TEST_COMMAND ./${test_executable} --input_stream=files ${test_file} ${answer_file})
-        endif()
+        set(TEST_COMMAND ${run_script} ${test_executable} ${test_file} ${answer_file})
 
         # add test
         add_test(
             NAME ${test_name}
             # execute test
-        
             COMMAND ${TEST_COMMAND}
             # working directory - dircetory with executable file
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -759,6 +778,37 @@ function(target_e2e_test test_executable test_dir ans_dir)
 
     endforeach()
 endfunction(target_e2e_test)
+
+# =============================================================================================================
+
+# check thah pyhon3 exist.
+# python need for e2e tests
+find_program(PYTHON_EXECUTABLE 
+    NAMES python3 python
+    DOC "Python executable"
+)
+
+if (NOT PYTHON_EXECUTABLE)
+    message(FATAL_ERROR "Python3 NOT find. No test available.")
+endif()
+
+# create tun_test script for e2e triangles test
+set(DEBUG_DIR              ${PROJECT_SOURCE_DIR}/debug)
+
+set(DEBUG_IN_DIR           ${DEBUG_DIR}/in)
+set(RUN_TEST_SCRIPT_IN     ${DEBUG_IN_DIR}/run_test.in)
+
+set(DEBUG_RUN_TEST_DIR     ${DEBUG_DIR}/parse_program_output)
+set(PYTHON_RUN_TEST_SCRIPT ${DEBUG_RUN_TEST_DIR}/parse_result.py)
+
+set(OUTPUT_SCRIPT          ${CMAKE_BINARY_DIR}/run_test)
+
+string(TIMESTAMP CURRENT_TIME "%Y-%m-%d %H:%M:%S")
+
+# give execute permission to python scripp
+file(CHMOD ${PYTHON_RUN_TEST_SCRIPT}
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+)
 
 # =============================================================================================================
 
@@ -771,20 +821,35 @@ set(TRIANGLES_TEST_DAT_DIR ${TRIANGLES_TEST_DIR}/dat)
 # set the directories with e2e test answers for run_triangles
 set(TRIANGLES_TEST_ANS_DIR ${TRIANGLES_TEST_DIR}/ans)
 
+# creating run_test from run_test.in
+configure_file(
+    ${RUN_TEST_SCRIPT_IN}
+    ${OUTPUT_SCRIPT}
+    @ONLY
+)
+
+# give execute permission to run_test
+file(CHMOD ${OUTPUT_SCRIPT}
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+)
+
 # add e2e tests to float triangles
-target_e2e_test(${TRIANGLES_EXE}
-               ${TRIANGLES_TEST_DAT_DIR}
-               ${TRIANGLES_TEST_ANS_DIR}
+target_e2e_test(${CMAKE_BINARY_DIR}/${TRIANGLES_EXE}
+                ${PYTHON_RUN_TEST_SCRIPT}
+                ${TRIANGLES_TEST_DAT_DIR}
+                ${TRIANGLES_TEST_ANS_DIR}
 )
 
 # add e2e tests to long double triangles
-target_e2e_test(${DOUBLE_TRIANGLES_EXE}
-               ${TRIANGLES_TEST_DAT_DIR}
-               ${TRIANGLES_TEST_ANS_DIR}
+target_e2e_test(${CMAKE_BINARY_DIR}/${DOUBLE_TRIANGLES_EXE}
+                ${PYTHON_RUN_TEST_SCRIPT}
+                ${TRIANGLES_TEST_DAT_DIR}
+                ${TRIANGLES_TEST_ANS_DIR}
 )
 
 # =============================================================================================================
 
+# add unit-tests to ctest
 foreach(unit_test_target ${ALL_UNIT_TESTS_TARGET})
     gtest_discover_tests(${unit_test_target})
 endforeach()

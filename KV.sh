@@ -1,1 +1,3 @@
-bash start.sh 2d-dump 3d-dump
+set -euo pipefail
+
+bash start.sh 3d-dump

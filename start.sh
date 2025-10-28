@@ -1,4 +1,3 @@
-#!/bin/bash
 set -euo pipefail
 
 # Console colors
@@ -56,21 +55,6 @@ function find_option
     return 1
 }
 
-function need_logger
-{
-    find_option "use-logger" "$@"
-}
-
-function need_verbose_output
-{
-    find_option "verbose" "$@"
-}
-
-function need_2d_dump
-{
-    find_option "2d-dump" "$@"
-}
-
 function need_3d_dump
 {
     find_option "3d-dump" "$@"
@@ -113,18 +97,6 @@ cmake_command="cmake \
 -DCMAKE_BUILD_TYPE=Release \
 -DCMAKE_EXPORT_COMPILE_COMMANDS=1"
 
-if need_logger "$@"; then
-    cmake_command="${cmake_command} -DUSE_LOGGER=1"
-fi
-
-if need_verbose_output "$@"; then
-    cmake_command="${cmake_command} -DVERBOSE_OUTPUT=1"
-fi
-
-if need_2d_dump "$@"; then
-    cmake_command="${cmake_command} -DTREE_2D_DUMP=1"
-fi
-
 if need_3d_dump "$@"; then
     cmake_command="${cmake_command} -DTREE_3D_DUMP=1"
 fi
@@ -141,9 +113,6 @@ custom_echo "${CONSOLE_COLOR_WHITE}" "" "cmake --build ${build_dir}/"
 cmake --build "${build_dir}/"
 
 custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "Building project completed successfully."
-skip_line_in_console
-
-custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "Creating ${run_test_script} completed successfully."
 skip_line_in_console
 
 custom_echo "${CONSOLE_COLOR_WHITE}" "${CONSOLE_BIND_FONT}" "To work with the project, execute:"

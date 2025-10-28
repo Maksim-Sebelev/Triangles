@@ -2,7 +2,7 @@
 
 //---------------------------------------------------------------------------------------------------------------
 
-#if defined(_DEBUG)
+#if not defined(NDEBUG)
 
 #include <iostream>                  // for msg_assert
 #include "custom_console_output.hpp" // for msg_ assert
@@ -25,7 +25,7 @@ if (!(bool_expression)) {                                \
     exit(EXIT_FAILURE);                                          \
 }} while (0)
 
-#else /* defined(_DEBUG) */
+#else /* not defined(NDEBUG) */
 
 #define ON_DEBUG(...)
 #define OFF_DEBUG(...) __VA_ARGS__
@@ -34,7 +34,7 @@ if (!(bool_expression)) {                                \
 
 #define msg_assert(bool_expression, message)
 
-#endif /* defined(_DEBUG) */
+#endif /* not defined(NDEBUG) */
 
 //---------------------------------------------------------------------------------------------------------------
 

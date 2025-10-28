@@ -4,14 +4,14 @@ on: [push, pull_request]
 
 jobs:
   test:
-    name: Test WITHOUT Logger
+    name: main test
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Install dependencies
-      run: sudo apt-get install -y cmake clang ninja-build libgtest-dev
+      run: sudo apt-get install -y cmake clang ninja-build libgtest-dev python3
 
     - name: Build without logger
       run: |
@@ -22,8 +22,8 @@ jobs:
       run: |
         ctest
 
-  test-with-logger:
-    name: Test WITH Logger  
+  test-debug:
+    name: test with debug options
     runs-on: ubuntu-latest
 
     steps:
@@ -32,11 +32,11 @@ jobs:
         submodules: recursive
 
     - name: Install dependencies
-      run: sudo apt-get install -y clang ninja-build libgtest-dev
+      run: sudo apt-get install -y clang ninja-build libgtest-dev python3
 
     - name: Build with logger
       run: |
-        bash start.sh use-logger && cd build/
+        bash debug_start.sh && cd build/
         ninja build_tests
 
     - name: Run tests

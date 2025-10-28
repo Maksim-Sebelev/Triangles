@@ -32,7 +32,7 @@ jobs:
         submodules: recursive
 
     - name: Install dependencies
-      run: sudo apt-get install -y clang ninja-build libgtest-dev python3
+      run: sudo apt-get install -y clang ninja-build libgtest-dev python3 graphviz
 
     - name: Build with logger
       run: |

@@ -13,9 +13,30 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get install -y cmake clang ninja-build libgtest-dev python3
 
-    - name: Build without logger
+    - name: build release version
       run: |
-        bash start.sh && cd build
+        bash start.sh
+        cd build
+        ninja build_tests
+
+    - name: Run Tests
+      run: |
+        ctest
+
+  test-3d:
+    name: test with 3d tree dump
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: sudo apt-get install -y cmake clang ninja-build libgtest-dev python3
+
+    - name: build release version with 3d-dumo
+      run: |
+        bash start.sh 3d-dump
+        cd build
         ninja build_tests
 
     - name: Run Tests
@@ -34,9 +55,10 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get install -y clang ninja-build libgtest-dev python3 graphviz
 
-    - name: Build with logger
+    - name: build with debug options
       run: |
-        bash debug_start.sh && cd build/
+        bash debug_start.sh
+        cd build
         ninja build_tests
 
     - name: Run tests

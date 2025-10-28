@@ -1,7 +1,3 @@
 [submodule "Src/third-party/logger"]
 	path = Src/third-party/logger
 	url = git@github.com:Maksim-Sebelev/logger.git
-
-[submodule "Src/third-party/imgui"]
-	path = Src/third-party/imgui
-	url = git@github.com:ocornut/imgui.git

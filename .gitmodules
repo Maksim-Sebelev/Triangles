@@ -4,3 +4,6 @@
 [submodule "Src/third-party/imgui"]
 	path = Src/third-party/imgui
 	url = git@github.com:ocornut/imgui.git
+[submodule "Src/third-party/glad"]
+	path = Src/third-party/glad
+	url = https://github.com/Dav1dde/glad.git

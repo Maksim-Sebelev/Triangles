@@ -916,8 +916,19 @@ template <typename coordinate_t>
 void
 octree_t<coordinate_t>::dump_2d(std::string_view img_name) const
 {
+#if defined(DOT_OUT_DIR)
+    static constexpr std::string dot_out_dir = DOT_OUT_DIR;
+#else /* defined(DOT_OUT_DIR) */
+#warning "Dot-out dir not given, using default: dot-out/"
     static constexpr std::string dot_out_dir = "dot-out/";
+#endif /* defined(DOT_OUT_DIR) */
+
+#if defined(IMG_OUT_DIR)
+    static constexpr std::string img_dir     = IMG_OUT_DIR;
+#else /* defined(IMG_OUT_DIR) */
+#warning "Img out dit not given. using defaul: ../2d-dump/"
     static constexpr std::string img_dir     = "../2d-dump/";
+#endif /* defined(IMG_OUT_DIR) */
 
     create_dir(dot_out_dir);
     create_dir(img_dir    );

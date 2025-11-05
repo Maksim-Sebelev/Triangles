@@ -16,6 +16,10 @@ import read_input_data;
 import triangle;
 import octree;
 
+ON_3D_DUMP(
+import octree_viz;
+)
+
 //---------------------------------------------------------------------------------------------------------------
 
 export module find_triangle_intersections;
@@ -62,7 +66,7 @@ get_good_triangles(const std::vector<Geometry::triangle_t<coordinate_t>>& triang
 
     ON_LOGGER (tree.dump   ());
     ON_2D_DUMP(tree.dump_2d());
-    ON_3D_DUMP(tree.dump_3d());
+    ON_3D_DUMP(Geometry::OctreeViz::dump_3d());
 
     return tree.get_good_triangles();
 }

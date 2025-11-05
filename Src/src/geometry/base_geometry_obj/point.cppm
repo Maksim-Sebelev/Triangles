@@ -14,7 +14,7 @@ import constants;
 import compare;
 
 #if defined(USE_LOGGER)
-import logger;
+import pineaplog;
 #endif /*define(USE_LOGGER)*/
 
 //----------------------------------------------------------------------------------------------------------------------------

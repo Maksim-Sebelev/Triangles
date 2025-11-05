@@ -1,3 +1,5 @@
+message("-- Adding Graphviz")
+
 # check dependencies
 find_program(DOT_COMMAND
     NAMES dot dot.exe
@@ -22,7 +24,7 @@ target_compile_definitions(${OCTREE_LIB}
         IMG_OUT_DIR="${IMG_OUT_DIR}/"
 )
 
-foreach(target ${TARGETS_USING_3D_DUMP})
+foreach(target ${TARGETS_USING_2D_DUMP})
     target_compile_definitions(${target} # this dump made in Src/modules/test/execute_test/execute_test.cppm
         PUBLIC
             ${2D_DUMP_MACRO}
@@ -30,7 +32,7 @@ foreach(target ${TARGETS_USING_3D_DUMP})
 endforeach()
 
 
-set(DOT_CLEAN_TARGET dot-clean)
+set(DOT_CLEAN_TARGET clean-dot)
 
 add_custom_target(${DOT_CLEAN_TARGET}
     COMMAND ${CMAKE_COMMAND} -E clean_directory "${DOT_OUT_DIR}"

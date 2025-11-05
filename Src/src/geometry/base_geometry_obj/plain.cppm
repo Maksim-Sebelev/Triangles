@@ -14,7 +14,7 @@ import compare;
 import matrix;
 
 #if defined(USE_LOGGER)
-import logger;
+import pineaplog;
 #endif /*defined(USE_LOGGER)*/ 
 
 //----------------------------------------------------------------------------------------------------------------------------

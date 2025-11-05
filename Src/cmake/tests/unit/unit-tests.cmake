@@ -1,9 +1,4 @@
 # =============================================================================================================
-
-find_package(GTest REQUIRED)
-include(GoogleTest)
-
-# =============================================================================================================
 # function to genererate unit-test
 # IF SECOND AND/OR THIRD ARGS ARE/IS LIST(-S), DONT FORGET ABOUT QUOTES
 

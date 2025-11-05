@@ -12,7 +12,7 @@ import compare;
 import linear_systems;
 
 #if defined(USE_LOGGER)
-import logger;
+import pineaplog;
 #endif // defined(USE_LOGGER)
 
 //----------------------------------------------------------------------------------------------------------------------------

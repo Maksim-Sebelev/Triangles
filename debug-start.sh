@@ -101,8 +101,8 @@ custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "Generating build sy
 
 cmake_command="cmake \
 -G Ninja \
--S ${source_dir} \
--B ${build_dir} \
+-S ${source_dir}/ \
+-B ${build_dir}/ \
 -DCMAKE_CXX_COMPILER=clang++ \
 -DCMAKE_BUILD_TYPE=Debug \
 -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \

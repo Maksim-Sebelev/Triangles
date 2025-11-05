@@ -17,7 +17,7 @@ import compare;
 import constants;
 
 #if defined(USE_LOGGER)
-import logger;
+import pineaplog;
 #endif /* defined(USE_LOGGER) */
 
 #if defined(DUMP_2D)
@@ -360,30 +360,31 @@ octree_t<coordinate_t>::update_min_bbox_side_length_in_ctor(const bounding_box_t
                             std::min(y_triangle_box_side,
                                      z_triangle_box_side));
 }
+
 //----------------------------------------------------------------------------------------------------------------------------
 
 template <typename coordinate_t>
 void
 octree_t<coordinate_t>::made_from_box_a_square(bounding_box_t& bbox)
 {
-    point_t      lb       = bbox.lbp;
-    point_t      tr       = bbox.rtp;
+    const point_t      lb       = bbox.lbp;
+    const point_t      tr       = bbox.rtp;
 
-    coordinate_t lb_x     = lb.get_x();
-    coordinate_t lb_y     = lb.get_y();
-    coordinate_t lb_z     = lb.get_z();
-    coordinate_t tr_x     = tr.get_x();
-    coordinate_t tr_y     = tr.get_y();
-    coordinate_t tr_z     = tr.get_z();
+    const coordinate_t lb_x     = lb.get_x();
+    const coordinate_t lb_y     = lb.get_y();
+    const coordinate_t lb_z     = lb.get_z();
+    const coordinate_t tr_x     = tr.get_x();
+    const coordinate_t tr_y     = tr.get_y();
+    const coordinate_t tr_z     = tr.get_z();
 
-    coordinate_t x_center = (lb_x + tr_x) / 2;
-    coordinate_t y_center = (lb_y + tr_y) / 2;
-    coordinate_t z_center = (lb_z + tr_z) / 2;
+    const coordinate_t x_center = (lb_x + tr_x) / 2;
+    const coordinate_t y_center = (lb_y + tr_y) / 2;
+    const coordinate_t z_center = (lb_z + tr_z) / 2;
 
-    coordinate_t half_max_box_side_length = std::max(tr_x - lb_x,
-                                            std::max(tr_y - lb_y,
-                                                     tr_z - lb_z)
-                                                    ) / static_cast<coordinate_t>(2);
+    const coordinate_t half_max_box_side_length = std::max(tr_x - lb_x,
+                                                  std::max(tr_y - lb_y,
+                                                           tr_z - lb_z)
+                                                   ) / static_cast<coordinate_t>(2);
 
     msg_assert(tr_x >= lb_x, "invariant of this class");
     msg_assert(tr_y >= lb_y, "invariant of this class");
@@ -402,6 +403,8 @@ octree_t<coordinate_t>::made_from_box_a_square(bounding_box_t& bbox)
         y_center + half_max_box_side_length + static_cast<coordinate_t>(1),
         z_center + half_max_box_side_length + static_cast<coordinate_t>(1)
     );
+
+    msg_assert(bbox.is_valid(), "possible bbox is not a square");
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -629,7 +632,7 @@ rtp(-std::numeric_limits<coordinate_t>::infinity(),
 
 template <typename coordinate_t>
 octree_t<coordinate_t>::bounding_box_t::bounding_box_t(const point_t& bottom_left_point,
-                                                      const point_t&   top_right_point) :
+                                                       const point_t&   top_right_point) :
 lbp(bottom_left_point),
 rtp(  top_right_point)
 {}
@@ -639,42 +642,42 @@ rtp(  top_right_point)
 template <typename coordinate_t>
 octree_t<coordinate_t>::bounding_box_t::bounding_box_t(const triangle_t& triangle)
 {
-    coordinate_t x_coordinates[triangle_vertices_quant] =
+    const coordinate_t x_coordinates[triangle_vertices_quant] =
     {
         triangle.get_a_x(),
         triangle.get_b_x(),
         triangle.get_c_x(),
     };
 
-    coordinate_t y_coordinates[triangle_vertices_quant] =
+    const coordinate_t y_coordinates[triangle_vertices_quant] =
     {
         triangle.get_a_y(),
         triangle.get_b_y(),
         triangle.get_c_y(),
     };
 
-    coordinate_t z_coordinates[triangle_vertices_quant] =
+    const coordinate_t z_coordinates[triangle_vertices_quant] =
     {
         triangle.get_a_z(),
         triangle.get_b_z(),
         triangle.get_c_z(),
     };
 
-    coordinate_t min_x_coordinate = *(std::min_element(x_coordinates, x_coordinates + triangle_vertices_quant));
-    coordinate_t min_y_coordinate = *(std::min_element(y_coordinates, y_coordinates + triangle_vertices_quant));
-    coordinate_t min_z_coordinate = *(std::min_element(z_coordinates, z_coordinates + triangle_vertices_quant));
+    const coordinate_t min_x_coordinate = *(std::min_element(x_coordinates, x_coordinates + triangle_vertices_quant));
+    const coordinate_t min_y_coordinate = *(std::min_element(y_coordinates, y_coordinates + triangle_vertices_quant));
+    const coordinate_t min_z_coordinate = *(std::min_element(z_coordinates, z_coordinates + triangle_vertices_quant));
 
-    coordinate_t max_x_coordinate = *(std::max_element(x_coordinates, x_coordinates + triangle_vertices_quant));
-    coordinate_t max_y_coordinate = *(std::max_element(y_coordinates, y_coordinates + triangle_vertices_quant));
-    coordinate_t max_z_coordinate = *(std::max_element(z_coordinates, z_coordinates + triangle_vertices_quant));
+    const coordinate_t max_x_coordinate = *(std::max_element(x_coordinates, x_coordinates + triangle_vertices_quant));
+    const coordinate_t max_y_coordinate = *(std::max_element(y_coordinates, y_coordinates + triangle_vertices_quant));
+    const coordinate_t max_z_coordinate = *(std::max_element(z_coordinates, z_coordinates + triangle_vertices_quant));
 
-    point_t bottom_left_point = point_t(min_x_coordinate,
-                                        min_y_coordinate,
-                                        min_z_coordinate);
+    const point_t bottom_left_point = point_t(min_x_coordinate,
+                                              min_y_coordinate,
+                                              min_z_coordinate);
 
-    point_t top_right_point   = point_t(max_x_coordinate,
-                                        max_y_coordinate,
-                                        max_z_coordinate);
+    const point_t top_right_point   = point_t(max_x_coordinate,
+                                              max_y_coordinate,
+                                              max_z_coordinate);
 
     *this = bounding_box_t(bottom_left_point,
                             top_right_point);
@@ -686,18 +689,18 @@ template <typename coordinate_t>
 bool
 octree_t<coordinate_t>::bounding_box_t::is_valid() const
 {
-    bool is_points_valid = lbp.is_valid() and
-                           rtp.is_valid();
-    if (!is_points_valid)
-        return false;
+    const bool is_points_valid = lbp.is_valid() and
+                                 rtp.is_valid();
 
-    coordinate_t len_x = rtp.get_x() - lbp.get_x();
-    coordinate_t len_y = rtp.get_y() - lbp.get_y();
-    coordinate_t len_z = rtp.get_z() - lbp.get_z();
+    if (!is_points_valid) return false;
 
-    bool is_square = (Math::Compare::compare(len_x, len_y)) and
-                     (Math::Compare::compare(len_x, len_z)) and // len_x = len_y = len_z >= 0
-                     (len_x >= 0);
+    const coordinate_t len_x = rtp.get_x() - lbp.get_x();
+    const coordinate_t len_y = rtp.get_y() - lbp.get_y();
+    const coordinate_t len_z = rtp.get_z() - lbp.get_z();
+
+    const bool is_square = (Math::Compare::compare(len_x, len_y)) and
+                           (Math::Compare::compare(len_x, len_z)) and
+                           (len_x >= 0);  /* len_x = len_y = len_z >= 0 */
 
     return is_square;
 }
@@ -871,16 +874,16 @@ octree_t<coordinate_t>::dump() const
 {
     for (size_t i = 0; i < triangles_quantity_; i++)
     {
-        glog.set_color(((i%2) ? LogColor::Green : LogColor::Red));
+        PineapLog::glog.set_color(((i%2) ? PineapLog::LogColor::Green : PineapLog::LogColor::Red));
         std::ostringstream s;
         s << i;
-        glog.log(triangles_and_boxes_[i].first.get_dump(s.str().c_str()));
+        PineapLog::glog.log(triangles_and_boxes_[i].first.get_dump(s.str().c_str()));
     }
 
-    glog.set_color(LogColor::Green);
-    glog.log_in_line_begin();
+    PineapLog::glog.set_color(PineapLog::LogColor::Green);
+    PineapLog::glog.log_in_line_begin();
     dump(root_.get());
-    glog.log_in_line_end();
+    PineapLog::glog.log_in_line_end();
 }
 ) /* ON_LOGGER */
 
@@ -891,9 +894,9 @@ template <typename coordinate_t>
 void
 octree_t<coordinate_t>::dump(node_t* node, size_t h) const
 {
-    glog.log_in_line("( ", "h{", h, "} ");
+    PineapLog::glog.log_in_line("( ", "h{", h, "} ");
     for (size_t i = 0; i < node->numbers_of_this_node_triangles.size(); i++)
-        glog.log_in_line(node->numbers_of_this_node_triangles[i], " ");
+        PineapLog::glog.log_in_line(node->numbers_of_this_node_triangles[i], " ");
 
     for (size_t i = 0; i < 8; i++)
     {
@@ -902,7 +905,7 @@ octree_t<coordinate_t>::dump(node_t* node, size_t h) const
         dump(node->children[i].get(), h + 1);                
     }
 
-    glog.log_in_line(") ");
+    PineapLog::glog.log_in_line(") ");
 }
 ) /* ON_LOGGER */
 
@@ -917,17 +920,17 @@ void
 octree_t<coordinate_t>::dump_2d(std::string_view img_name) const
 {
 #if defined(DOT_OUT_DIR)
-    static constexpr std::string dot_out_dir = DOT_OUT_DIR;
+    static const std::string dot_out_dir = DOT_OUT_DIR;
 #else /* defined(DOT_OUT_DIR) */
 #warning "Dot-out dir not given, using default: dot-out/"
-    static constexpr std::string dot_out_dir = "dot-out/";
+    static const std::string dot_out_dir = "dot-out/";
 #endif /* defined(DOT_OUT_DIR) */
 
 #if defined(IMG_OUT_DIR)
-    static constexpr std::string img_dir     = IMG_OUT_DIR;
+    static const std::string img_dir     = IMG_OUT_DIR;
 #else /* defined(IMG_OUT_DIR) */
 #warning "Img out dit not given. using defaul: ../2d-dump/"
-    static constexpr std::string img_dir     = "../2d-dump/";
+    static const std::string img_dir     = "../2d-dump/";
 #endif /* defined(IMG_OUT_DIR) */
 
     create_dir(dot_out_dir);
@@ -1173,7 +1176,28 @@ octree_t<coordinate_t>::failed_open_dot_file_message(std::string_view img_name) 
               << img_name << "'" RESET_CONSOLE_OUT << std::endl;
 }
 
-) /* ON_3D_DUMP */
+) /* ON_2D_DUMP */
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+ON_3D_DUMP(
+template <typename coordinate_t>
+void
+octree_t<coordinate_t>::dump_3d() const
+{
+
+}
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+) /* ON_2D_DUMP */
 
 //----------------------------------------------------------------------------------------------------------------------------
 

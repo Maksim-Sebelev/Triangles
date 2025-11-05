@@ -2,16 +2,23 @@
 
 //---------------------------------------------------------------------------------------------------------------
 
+#if defined(NDEBUG) and (defined(_DEBUG) or defined(DEBUG))
+static_assert(false, "bad release-debug macro combo");
+#endif /* defined(NDEBUG) and (defined(_DEBUG) or defined(DEBUG)) */
+
+//---------------------------------------------------------------------------------------------------------------
+
 #if not defined(NDEBUG)
 
 #include <iostream>                  // for msg_assert
-#include "custom_console_output.hpp" // for msg_ assert
 #include <cstdlib>                   // for EXIT_SUCCESS macro
+
+#include "custom_console_output.hpp"
 
 #define ON_DEBUG(...) __VA_ARGS__
 #define OFF_DEBUG(...)
 
-#define builtin_unreachable_wrapper(debug_message) msg_assert(false, debug_message)
+#define builtin_unreachable_wrapper(debug_message) msg_assert(false, "__builtin_unreachable() reaached\n" << debug_message)
 
 #define msg_assert(bool_expression, message) do {       \
 if (!(bool_expression)) {                                \

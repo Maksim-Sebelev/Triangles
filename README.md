@@ -569,7 +569,7 @@ python3 "/home/ananasik/projects/C++/vlados/2/triangles/3_version/Src/debug/pars
 
 Для компиляции unit-тестов выполните:
 ```bash
-ninja build_tests # сборка unit-тестов, e2e собираются вместе со всем проектом вместе
+ninja build-tests # сборка unit-тестов, e2e собираются вместе со всем проектом вместе
 ```
 После чего запустите тесты:
 ```bash

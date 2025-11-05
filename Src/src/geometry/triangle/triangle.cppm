@@ -15,7 +15,7 @@ import constants;
 import relative_positions;
 
 #if defined(USE_LOGGER)
-import logger;
+import pineaplog;
 #endif // defined(USE_LOGGER)
 
 //----------------------------------------------------------------------------------------------------------------------------

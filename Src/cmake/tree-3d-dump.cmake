@@ -1,3 +1,5 @@
+message("-- Adding OpenGL")
+
 # check dependencies
 # find_package(OpenGL REQUIRED)
 # find_package(glfw3 REQUIRED)
@@ -49,15 +51,17 @@ target_include_directories(${GLAD_LIB}
 
 # =============================================================================================================
 
-set(OCTREE_VIZ_LIB octree_viz)
-add_library(${OCTREE_VIZ_LIB})
+set(VIZ_LIB octree_viz)
+add_library(${VIZ_LIB})
 
-set(OCTREE_VIZ_SRC_DIR ${OCTREE_SRC_DIR}/dump_3d)
+set(VIZ_SRC_DIR ${OCTREE_SRC_DIR}/viz)
 set(OCTREE_VIZ_SRC
-    ${OCTREE_VIZ_SRC_DIR}/octree_vizualization.cppm
+    ${VIZ_SRC_DIR}/window.cppm
+    ${VIZ_SRC_DIR}/camera.cppm
+    ${VIZ_SRC_DIR}/key_parser.cppm
 )
 
-target_sources(${OCTREE_VIZ_LIB}
+target_sources(${VIZ_LIB}
     PUBLIC
         FILE_SET
             CXX_MODULES
@@ -67,14 +71,14 @@ target_sources(${OCTREE_VIZ_LIB}
             ${OCTREE_VIZ_SRC}
 )
 
-target_include_directories(${OCTREE_VIZ_LIB}
+target_include_directories(${VIZ_LIB}
     PRIVATE
         ${GLOBAL_INCLUDE_DIR}
         ${GLAD_INCLUDE_DIR}
         ${IMGUI_INCLUDE_DIR}
 )
 
-target_link_libraries(${OCTREE_VIZ_LIB}
+target_link_libraries(${VIZ_LIB}
     PRIVATE
         ${OCTREE_LIB}
         ${GLAD_LIB}
@@ -83,7 +87,7 @@ target_link_libraries(${OCTREE_VIZ_LIB}
         # OpenGL::GL
 )
 
-target_debug_options(${OCTREE_VIZ_LIB})
+target_debug_options(${VIZ_LIB})
 
 # defined macro DUMP_3D 
 set(3D_DUMP_MACRO DUMP_3D)
@@ -96,6 +100,6 @@ foreach(target ${TARGETS_USING_2D_DUMP})
 
     target_link_libraries(${target}
         PRIVATE
-            ${OCTREE_VIZ_LIB}
+            ${VIZ_LIB}
     )
 endforeach()

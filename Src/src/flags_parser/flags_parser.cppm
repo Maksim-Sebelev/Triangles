@@ -13,7 +13,7 @@ module;
 #include "custom_console_output.hpp"
 
 #if defined(USE_LOGGER)
-import logger;
+import pineaplog;
 #endif /* defined(USE_LOGGER) */
 
 //---------------------------------------------------------------------------------------------------------------

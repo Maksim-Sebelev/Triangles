@@ -56,7 +56,7 @@ check_that_exists python3 || exit 1
 
 ntest="$1"
 
-python3 "@PYTHON_RUN_TEST_SCRIPT@" \
+"@PYTHON_RUN_TEST_SCRIPT@" \
         "@CMAKE_BINARY_DIR@/@TRIANGLES_EXE@" \
         "@TRIANGLES_TEST_DAT_DIR@/$ntest.dat" \
         "@TRIANGLES_TEST_ANS_DIR@/$ntest.ans"

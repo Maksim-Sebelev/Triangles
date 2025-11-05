@@ -94,8 +94,8 @@ cmake_command="cmake \
 -S ${source_dir} \
 -B ${build_dir} \
 -DCMAKE_CXX_COMPILER=clang++ \
--DCMAKE_BUILD_TYPE=Release \
--DCMAKE_EXPORT_COMPILE_COMMANDS=1"
+-DCMAKE_C_COMPILER=clang \
+-DCMAKE_BUILD_TYPE=Release"
 
 if need_3d_dump "$@"; then
     cmake_command="${cmake_command} -DTREE_3D_DUMP=1"
